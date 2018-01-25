@@ -10,7 +10,7 @@ import NVActivityIndicatorView
 
 class PictureListViewController: BaseViewController, ReactorKit.View {
     
-    typealias SectionType = AnimatableSectionModel<UInt32, PictureSectionItem>
+    typealias SectionType = AnimatableSectionModel<String, PictureSectionItem>
     typealias RxDataSource = RxTableViewSectionedAnimatedDataSource<SectionType>
     
     @IBOutlet weak var retryButton: UIButton!
@@ -57,14 +57,15 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         
         Observable.combineLatest(dataSectionObservable, isLoadingMoreObservable, isLoadingMoreErrorObservable)
             .map { (dataItems, isLoadingMore, isLoadingMoreError) in
-                let footerItem = AnimatableSectionModel(model: UInt32(1000000), items: [PictureSectionItem.FooterItem(isLoading: isLoadingMore, isError: isLoadingMoreError)])
-                return dataItems + [footerItem]
+                let footerItem = PictureSectionItem.FooterItem(isLoading: isLoadingMore, isError: isLoadingMoreError)
+                let model = AnimatableSectionModel(model: footerItem.identity, items: [footerItem])
+                return dataItems + [model]
             }
             .bind(to: tableView.rx.items(dataSource: self.rxDataSource))
             .disposed(by: self.disposeBag)
         
         reactor.state
-            .getChange { $0.isMainError }
+            .getChange { $0.isLoadingMainError }
             .subscribe(onNext: { (isMainError) in
                 self.errorContainer.isHidden = !isMainError
             })
@@ -82,30 +83,6 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                 }
             })
             .disposed(by: self.disposeBag)
-        
-        reactor.state
-            .getChange { $0.isRefreshEnabled }
-            .subscribe(onNext: { (isRefreshEnabled) in
-                if isRefreshEnabled {
-                    self.tableView.refreshControl = self.refresher
-                } else {
-                    self.tableView.refreshControl = nil
-                }
-            })
-            .disposed(by: self.disposeBag)
-        
-        reactor.state
-            .getChange { $0.isLoadingRefresh }
-            .subscribe(onNext: { (isRefreshEnabled) in
-                if isRefreshEnabled {
-                    if !self.refresher.isRefreshing {
-                        self.refresher.beginRefreshing()
-                    }
-                } else {
-                    self.refresher.endRefreshing()
-                }
-            })
-            .disposed(by: self.disposeBag)
 
         refresher.rx.controlEvent(.valueChanged)
             .map { .refresh }
@@ -114,17 +91,27 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         
         tableView.rx
             .reachedBottom()
-            .withLatestFrom(reactor.state.map { $0.isLoadMoreEnabled }, resultSelector: { ($0, $1) })
-            .filter { (reachedBottom, isLoadMoreEnabled) in isLoadMoreEnabled }
+            .withLatestFrom(reactor.state.map { $0.isLoadMoreEnabled })
+            .filter { $0 }
             .map { _ in .loadMore }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
         rx.viewWillAppear
             .take(1)
-            .map { _ in .viewWillAppear }
+            .map { _ in .initialize }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        
+        if var destinationViewController = segue.destination as? PictureDetailViewController {
+            if let index = sender as? IndexPath {
+                 destinationViewController.initialPictureIndex = index.section
+            }
+        }
     }
 }
 
@@ -139,11 +126,7 @@ extension PictureListViewController {
                         cell.title.text = "Default"
                     }
                     
-                    if indexPath.row == 0 {
-                        cell.title.heroID = "herolabel"
-                        cell.picture.heroID = "Test"
-                        cell.picture.heroModifiers = [.translate(y:100)]
-                    }
+                    cell.picture.heroID = picture.id
                     
                     if let url = picture.pictureURL {
                         cell.picture.af_setImage(withURL: url )
@@ -160,7 +143,7 @@ extension PictureListViewController {
                     cell.picture.rx
                         .tapGesture()
                         .when(.recognized)
-                        .subscribe(onNext: { _ in self.performSegue(withIdentifier: FilterViewController.sequeIdentifier, sender: nil) })
+                        .subscribe(onNext: { _ in self.performSegue(withIdentifier: PictureDetailViewController.sequeIdentifier, sender: indexPath) })
                         .disposed(by: cell.disposeBagCell)
                     
                     cell.selectionStyle = UITableViewCellSelectionStyle.none
@@ -175,8 +158,10 @@ extension PictureListViewController {
                         cell.setErrorState()
                     }
                     
-                    cell.errorButton.rx.tap
-                        .map { .loadMore }
+                    cell.errorButton.rx.tapGesture()
+                        .when(.recognized)
+                        .map { _ in .loadMore }
+                        .debug("TAP")
                         .bind(to: self.reactor!.action)
                         .disposed(by: cell.disposeBagCell)
                     

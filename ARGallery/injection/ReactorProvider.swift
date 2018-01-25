@@ -4,7 +4,7 @@ protocol ReactorProviderType {
     
     func createPictureListReactor() -> PictureListReactor
     
-    func createPictureDetailReactor() -> PictureDetailReactor
+    func createPictureDetailReactor(initialIndex: Int) -> PictureDetailReactor
     
     func createFilterReactor() -> FilterReactor
 }
@@ -24,8 +24,8 @@ class ReactorProvider: ReactorProviderType {
         return PictureListReactor(provider: serviceProvider)
     }
     
-    func createPictureDetailReactor() -> PictureDetailReactor {
-        return PictureDetailReactor(provider: serviceProvider)
+    func createPictureDetailReactor(initialIndex: Int) -> PictureDetailReactor {
+        return PictureDetailReactor(provider: serviceProvider, initialPictureIndex: initialIndex)
     }
     
     func createFilterReactor() -> FilterReactor {

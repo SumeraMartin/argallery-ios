@@ -25,7 +25,7 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
         super.viewDidLoad()
 
         let coverDown: HeroDefaultAnimationType = .cover(direction: .down)
-        let coverUp: HeroDefaultAnimationType = .cover(direction: .up)
+        let coverUp: HeroDefaultAnimationType = .uncover(direction: .up)
         heroModalAnimationType = .selectBy(presenting: coverDown, dismissing: coverUp)
         
         priceFilter.delegate = self

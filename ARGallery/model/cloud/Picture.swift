@@ -4,11 +4,16 @@ import RxDataSources
 
 class Picture: Mappable {
     
-    let id: UInt32
+    var id: String = "XXX"
+    
     let title: TextElement
+    
     let author: TextElement
+    
     let picture: AssetElement
+    
     let description: TextElement
+    
     let price: NumberElement
     
     var pictureURL: URL? {
@@ -24,7 +29,8 @@ class Picture: Mappable {
     
     required init?(map: Map){
         let mapper = MapElement.init(map: map)
-        id = arc4random_uniform(10001)
+        
+        id <- map["system.id"]
         title = mapper.map(elementName: "title", elementType: TextElement.self)
         author = mapper.map(elementName: "author", elementType: TextElement.self)
         picture = mapper.map(elementName: "picture", elementType: AssetElement.self)

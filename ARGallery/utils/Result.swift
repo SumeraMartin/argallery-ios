@@ -11,10 +11,21 @@ enum Result<VALUE> {
         return !isSuccess()
     }
     
-    func either<R>(success : ((VALUE) -> R), failure : ((Error) -> R)) -> R {
+    func either<R>(success: ((VALUE) -> R), failure: ((Error) -> R)) -> R {
         switch self {
         case let .Success(a): return success(a)
         case let .Failure(b) : return failure(b)
+        }
+    }
+    
+    func flatMap(success: ((VALUE) -> ()), failure: ((Error) -> ())) {
+        switch self {
+            case let .Success(a):
+                success(a)
+                break
+            case let .Failure(b) :
+                failure(b)
+                break
         }
     }
 }

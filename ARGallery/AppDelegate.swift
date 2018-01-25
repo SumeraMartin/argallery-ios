@@ -20,12 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 //        HeroDebugPlugin.isEnabled = true
         
-        if let viewController = window?.rootViewController as? UINavigationController {
-            for child in viewController.viewControllers {
-                if var client = child as? AppAssemblerClient {
-                    client.assembler = appAssembler
-                }
-            }
+        if var client = window?.rootViewController as? AppAssemblerClient {
+            client.assembler = appAssembler
         }
         
         return true

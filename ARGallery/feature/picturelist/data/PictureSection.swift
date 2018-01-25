@@ -6,12 +6,12 @@ enum PictureSectionItem {
 }
 
 extension PictureSectionItem: IdentifiableType, Equatable {
-    var identity : UInt32 {
+    var identity : String {
         switch self {
             case let .DataItem(picture):
                 return picture.id
             case .FooterItem(_):
-                return UInt32(1000000)
+                return "FOOTER-ID"
         }
     }
     
