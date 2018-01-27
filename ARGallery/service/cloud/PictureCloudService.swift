@@ -18,7 +18,7 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
     
     typealias ClearPreviousData = Bool
     
-    static let limit = 1
+    static let limit = 5
     
     let disposeBag = DisposeBag()
     
@@ -93,7 +93,7 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
                     .do(onNext: { result in
                         result.flatMap(success: { pictures in
                             self.pictureLoadingStateSubject.onNext(.Inactive)
-                            let newData = previousData + pictures
+                            let newData = previousData + pictures + pictures + pictures + pictures
                             self.pictureSubject.onNext(newData)
                         }, failure: { _ in
                             if previousData.count == 0 {

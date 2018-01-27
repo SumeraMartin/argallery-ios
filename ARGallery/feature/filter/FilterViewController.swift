@@ -28,16 +28,22 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
     
     @IBOutlet weak var resetButton: UIBarButtonItem!
     
+    var panGestureRecognizer = UIPanGestureRecognizer()
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         let coverDown: HeroDefaultAnimationType = .cover(direction: .down)
         let coverUp: HeroDefaultAnimationType = .uncover(direction: .up)
         heroModalAnimationType = .selectBy(presenting: coverDown, dismissing: coverUp)
+        
+        panGestureRecognizer.addTarget(self, action: #selector(pan))
+        panGestureRecognizer.delegate = self
+        self.view.addGestureRecognizer(panGestureRecognizer)
         
         priceRange.delegate = self
         yearRange.delegate = self
@@ -147,7 +153,33 @@ extension FilterViewController: TTRangeSliderDelegate {
             let year = YearRange(minYear: Int(selectedMinimum), maxYear: Int(selectedMaximum))
             yearRangeSubject.on(.next(year))
         }
-        
+    }
+}
+
+extension FilterViewController: UIGestureRecognizerDelegate {
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let v = panGestureRecognizer.velocity(in: nil)
+        return v.y * -1 > abs(v.x) && v.y * -1 > 100
     }
     
+    @objc func pan() {
+        let translation = panGestureRecognizer.translation(in: nil)
+        let progress = translation.y / 2 / self.view.bounds.height
+        switch panGestureRecognizer.state {
+            case .began:
+                hero_dismissViewController()
+                break
+            case .changed:
+                Hero.shared.update(progress)
+                let currentPos = CGPoint(x: view.center.x, y: view.center.y + translation.y)
+                Hero.shared.apply(modifiers: [.position(currentPos)], to: self.view)
+            default:
+                if progress + panGestureRecognizer.velocity(in: nil).y / self.view.bounds.height < 0.1 {
+                    Hero.shared.finish()
+                } else {
+                    Hero.shared.cancel(animate: true)
+                }
+            }
+    }
 }

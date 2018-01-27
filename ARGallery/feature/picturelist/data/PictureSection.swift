@@ -3,6 +3,8 @@ import RxDataSources
 enum PictureSectionItem {
     case DataItem(item: Picture)
     case FooterItem(isLoading: Bool, isError: Bool)
+    case startEdgePadding
+    case endEdgePadding
 }
 
 extension PictureSectionItem: IdentifiableType, Equatable {
@@ -11,7 +13,11 @@ extension PictureSectionItem: IdentifiableType, Equatable {
             case let .DataItem(picture):
                 return picture.id
             case .FooterItem(_):
-                return "FOOTER-ID"
+                return "FOOTER_ID"
+            case .startEdgePadding:
+                return "START_EDGE_PADDING"
+            case .endEdgePadding:
+                return "END_EDGE_PADDING"
         }
     }
     

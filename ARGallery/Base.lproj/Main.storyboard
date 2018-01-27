@@ -18,13 +18,14 @@
         <!--ARGallery-->
         <scene sceneID="Bhc-nX-mDD">
             <objects>
-                <viewController id="tEr-nS-qc6" customClass="PictureListViewController" customModule="ARGallery" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController providesPresentationContextTransitionStyle="YES" id="tEr-nS-qc6" customClass="PictureListViewController" customModule="ARGallery" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="gYf-qp-Mp5">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="gWO-pv-vyx">
                                 <rect key="frame" x="0.0" y="358" width="375" height="420"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="420" id="VeI-fr-0dk"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="420" id="uE4-8z-Bhj"/>
@@ -36,8 +37,16 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="picture_cell" reuseIdentifier="picture_cell" id="gby-Ub-38n" userLabel="Picture Cell" customClass="PictureCell" customModule="ARGallery" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="padding_cell" id="Qj2-al-ePp" userLabel="Padding cell">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
+                                            <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </view>
+                                    </collectionViewCell>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="picture_cell" reuseIdentifier="picture_cell" id="gby-Ub-38n" userLabel="Picture Cell" customClass="PictureCell" customModule="ARGallery" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="61.666666666666664" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
                                             <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -60,7 +69,7 @@
                                         </connections>
                                     </collectionViewCell>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="loading_more_cell" reuseIdentifier="loading_more_cell" id="MYz-8p-HNi" userLabel="Loading More Cell" customClass="LoadingMoreCell" customModule="ARGallery" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="61.666666666666664" width="50" height="50"/>
+                                        <rect key="frame" x="0.0" y="123.33333333333333" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
                                             <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -183,7 +192,7 @@
                         <outlet property="loadingView" destination="2Mo-1d-lY7" id="nJY-uX-LRj"/>
                         <outlet property="retryButton" destination="1Rd-cS-fE1" id="tL4-al-1us"/>
                         <segue destination="Ifg-rF-32p" kind="showDetail" identifier="show_picture_detail_seque" action="showViewController:sender:" id="wr8-28-h6e"/>
-                        <segue destination="P0M-IT-Tpv" kind="showDetail" identifier="show_filter_seque" id="dvz-M3-7Lq"/>
+                        <segue destination="P0M-IT-Tpv" kind="presentation" identifier="show_filter_seque" id="dvz-M3-7Lq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0dC-Jr-bB7" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -193,8 +202,8 @@
         <!--Filter View Controller-->
         <scene sceneID="1Sm-nB-CMg">
             <objects>
-                <viewController id="P0M-IT-Tpv" customClass="FilterViewController" customModule="ARGallery" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="f8f-LJ-S2z">
+                <viewController definesPresentationContext="YES" modalPresentationStyle="overCurrentContext" id="P0M-IT-Tpv" customClass="FilterViewController" customModule="ARGallery" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="f8f-LJ-S2z">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -473,7 +482,7 @@
                                 </constraints>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.22370490771812079" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="ZT5-We-jSq" firstAttribute="leading" secondItem="k0N-NE-WwV" secondAttribute="leading" id="ElF-IP-zd8"/>
                             <constraint firstItem="LCR-dX-bp5" firstAttribute="top" secondItem="VHJ-3l-LJr" secondAttribute="bottom" id="Lw5-6z-mRz"/>
@@ -515,7 +524,7 @@
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" pagingEnabled="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="D1U-oO-YtD">
                                 <rect key="frame" x="0.0" y="44" width="375" height="734"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="7YJ-dN-xrN">
                                     <size key="itemSize" width="375" height="749"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>

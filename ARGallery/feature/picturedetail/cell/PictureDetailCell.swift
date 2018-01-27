@@ -33,9 +33,7 @@ class PictureDetailCell: BaseCollectionViewCell {
         scrollView.contentMode = .center
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.showsVerticalScrollIndicator = false
-        #if os(tvOS)
-            scrollView.panGestureRecognizer.allowedTouchTypes = [ NSNumber(value:UITouchType.indirect.rawValue) ]
-        #endif
+        
         addSubview(scrollView)
         
         dTapGR = UITapGestureRecognizer(target: self, action: #selector(doubleTap(gr:)))
