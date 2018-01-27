@@ -23,6 +23,41 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" pagingEnabled="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="RUf-oq-GGm" userLabel="Info Collection View">
+                                <rect key="frame" x="0.0" y="132" width="375" height="120"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="120" id="hzL-eB-8Yi"/>
+                                </constraints>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="0Uk-zp-pr6">
+                                    <size key="itemSize" width="50" height="50"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="picture_info_cell" id="anT-rr-1ae" userLabel="Picture Cell" customClass="PictureInfoCell" customModule="ARGallery" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
+                                            <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xVz-pO-tmt" userLabel="Title">
+                                                    <rect key="frame" x="4" y="14" width="42" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </view>
+                                        <connections>
+                                            <outlet property="title" destination="xVz-pO-tmt" id="j3x-HK-wcK"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                            </collectionView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="gWO-pv-vyx">
                                 <rect key="frame" x="0.0" y="358" width="375" height="420"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -173,10 +208,13 @@
                             <constraint firstItem="C1W-2F-FHl" firstAttribute="trailing" secondItem="piq-Nt-svI" secondAttribute="trailing" constant="48" id="4xT-gE-sLz"/>
                             <constraint firstItem="C1W-2F-FHl" firstAttribute="bottom" secondItem="gWO-pv-vyx" secondAttribute="bottom" id="ZwV-t9-uLo" userLabel="Safe Area.bottom = Image Collection View.bottom + 16"/>
                             <constraint firstItem="piq-Nt-svI" firstAttribute="leading" secondItem="C1W-2F-FHl" secondAttribute="leading" constant="48" id="kEt-oZ-ZX1"/>
+                            <constraint firstItem="RUf-oq-GGm" firstAttribute="top" secondItem="piq-Nt-svI" secondAttribute="bottom" id="kM4-KV-e8T"/>
                             <constraint firstItem="gWO-pv-vyx" firstAttribute="leading" secondItem="C1W-2F-FHl" secondAttribute="leading" id="nAq-tu-MfC"/>
                             <constraint firstItem="fpW-Fj-Mtj" firstAttribute="top" secondItem="C1W-2F-FHl" secondAttribute="top" constant="16" id="tMw-1f-nb2"/>
+                            <constraint firstItem="RUf-oq-GGm" firstAttribute="leading" secondItem="C1W-2F-FHl" secondAttribute="leading" id="wQ2-AD-zcF"/>
                             <constraint firstItem="piq-Nt-svI" firstAttribute="top" secondItem="C1W-2F-FHl" secondAttribute="top" constant="48" id="xas-hl-dXR"/>
                             <constraint firstItem="C1W-2F-FHl" firstAttribute="trailing" secondItem="gWO-pv-vyx" secondAttribute="trailing" id="yV1-5T-73L"/>
+                            <constraint firstItem="RUf-oq-GGm" firstAttribute="trailing" secondItem="C1W-2F-FHl" secondAttribute="trailing" id="zTg-Zs-JiA"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="C1W-2F-FHl"/>
                     </view>
@@ -188,6 +226,7 @@
                         <outlet property="errorContainer" destination="gpa-bd-bjQ" id="v1a-1k-wjQ"/>
                         <outlet property="filterIcon" destination="fpW-Fj-Mtj" id="O7i-mF-1r4"/>
                         <outlet property="imageCollectionView" destination="gWO-pv-vyx" id="7un-Dq-lhI"/>
+                        <outlet property="infoCollectionView" destination="RUf-oq-GGm" id="ucO-XQ-lBT"/>
                         <outlet property="loadingContainer" destination="uOM-hH-9be" id="zOt-XO-E5X"/>
                         <outlet property="loadingView" destination="2Mo-1d-lY7" id="nJY-uX-LRj"/>
                         <outlet property="retryButton" destination="1Rd-cS-fE1" id="tL4-al-1us"/>

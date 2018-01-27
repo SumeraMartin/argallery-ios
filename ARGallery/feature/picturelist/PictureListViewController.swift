@@ -10,8 +10,10 @@ import NVActivityIndicatorView
 
 class PictureListViewController: BaseViewController, ReactorKit.View {
     
-    typealias SectionType = AnimatableSectionModel<String, PictureSectionItem>
-    typealias RxDataSource = RxCollectionViewSectionedAnimatedDataSource<SectionType>
+    typealias PictureInfoSectionType = AnimatableSectionModel<String, PictureInfoSectionItem>
+    typealias RxPictureInfoDataSource = RxCollectionViewSectionedAnimatedDataSource<PictureInfoSectionType>
+    typealias PictureSectionType = AnimatableSectionModel<String, PictureSectionItem>
+    typealias RxPictureDataSource = RxCollectionViewSectionedAnimatedDataSource<PictureSectionType>
     
     @IBOutlet weak var retryButton: UIButton!
     
@@ -21,17 +23,25 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
     
     @IBOutlet weak var imageCollectionView: UICollectionView!
     
+    @IBOutlet weak var infoCollectionView: UICollectionView!
+    
     @IBOutlet weak var loadingContainer: UIView!
     
     @IBOutlet weak var filterIcon: UIImageView!
     
+    let scrollSpeedEvaluator = ScrollSpeedEvaluator()
+    
+    let collectionViewResizer = CollectionViewResizer()
+    
+    let snapHelper = SnapHelper()
+    
+    let pictureFocusedSubject = PublishSubject<Picture>()
+    
     var refresher: UIRefreshControl!
     
-    var rxDataSource: RxDataSource!
+    var pictureDataSource: RxPictureDataSource!
     
-    var lastOffset:CGPoint? = CGPoint(x: 0, y: 0)
-    var lastOffsetCapture:TimeInterval? = 0
-    var isScrollingFast: Bool = false
+    var pictureInfoDataSource: RxPictureInfoDataSource!
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -43,10 +53,12 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         refresher = UIRefreshControl()
         refresher.tintColor = UIColor.blue
         
-        rxDataSource = dataSource()
+        pictureDataSource = createPictureDataSource()
+        pictureInfoDataSource = createPictureInfoDataSource()
+        
+        infoCollectionView.delegate = self
         
         imageCollectionView.delegate = self
-//        imageCollectionView.decelerationRate = UIScrollViewDecelerationRateFast
         imageCollectionView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
         
         reactor = assembler.reactorProvider.createPictureListReactor()
@@ -74,7 +86,13 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                 
                 return [startPaddingModel] + dataItems + [model] + [endPaddingModel]
             }
-            .bind(to: imageCollectionView.rx.items(dataSource: self.rxDataSource))
+            .bind(to: imageCollectionView.rx.items(dataSource: self.pictureDataSource))
+            .disposed(by: self.disposeBag)
+        
+        reactor.state
+            .getChange { $0.data }
+            .map { $0.map { AnimatableSectionModel(model: $0.id, items: [PictureInfoSectionItem.pictureInfo(picture: $0)]) } }
+            .bind(to: infoCollectionView.rx.items(dataSource: self.pictureInfoDataSource))
             .disposed(by: self.disposeBag)
         
         reactor.state
@@ -94,6 +112,19 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                     self.loadingView.stopAnimating()
                     self.loadingContainer.isHidden = true
                 }
+            })
+            .disposed(by: self.disposeBag)
+        
+        pictureFocusedSubject
+            .distinctUntilChanged()
+            .withLatestFrom(reactor.state) { picture, state in
+                let index = state.data.index(of: picture)
+                guard let safeIndex = index else { fatalError() }
+                let intIndex = state.data.distance(from: state.data.startIndex, to: safeIndex)
+                return IndexPath(row: 0, section: intIndex)
+            }
+            .subscribe(onNext: { (index) in
+                self.infoCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
             })
             .disposed(by: self.disposeBag)
         
@@ -148,8 +179,8 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
 }
 
 extension PictureListViewController {
-    func dataSource() -> RxDataSource {
-        return RxDataSource(configureCell: { dataSource, tableView, indexPath, _ in
+    func createPictureDataSource() -> RxPictureDataSource {
+        return RxPictureDataSource(configureCell: { dataSource, tableView, indexPath, _ in
             switch dataSource[indexPath] {
                 case let .DataItem(picture):
                     let cell = self.imageCollectionView.dequeueReusableCell(withReuseIdentifier: PictureCell.identifier, for: indexPath) as! PictureCell
@@ -204,110 +235,70 @@ extension PictureListViewController {
     }
 }
 
+extension PictureListViewController {
+    func createPictureInfoDataSource() -> RxPictureInfoDataSource {
+        return RxPictureInfoDataSource(configureCell: { dataSource, tableView, indexPath, _ in
+            switch dataSource[indexPath] {
+                case let .pictureInfo(picture):
+                    let cell = self.infoCollectionView.dequeueReusableCell(withReuseIdentifier: PictureInfoCell.identifier, for: indexPath) as! PictureInfoCell
+                    
+                    cell.title.text = picture.title.value
+                    
+                    return cell
+            }
+        }, configureSupplementaryView: { (dataSource, collectionView, kind, indexPath) in
+            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: PictureReusableView.identifier, for: indexPath) as! PictureReusableView
+        })
+    }
+}
+
 extension PictureListViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        if indexPath.section == 0 {
-            return CGSize(width: 150, height: collectionView.frame.height)
+        if collectionView == imageCollectionView {
+            if indexPath.section == 0 {
+                return CGSize(width: 150, height: collectionView.frame.height)
+            }
+            return CGSize(width: 300, height: collectionView.frame.height)
         }
-        return CGSize(width: 300, height: collectionView.frame.height)
+        
+        if collectionView == infoCollectionView {
+            return collectionView.frame.size
+        }
+        
+        fatalError("Unknown collection view")
     }
 }
 
 extension PictureListViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let visibleCenterPositionOfScrollView = Float(imageCollectionView.contentOffset.x + (self.imageCollectionView.bounds.size.width / 2))
-        var closestCellIndex = -1
-        var closestDistance: Float = .greatestFiniteMagnitude
-        for i in 0..<imageCollectionView.visibleCells.count {
-            let cell = imageCollectionView.visibleCells[i]
-            let cellWidth = cell.bounds.size.width
-            let cellCenter = Float(cell.frame.origin.x + cellWidth / 2)
-            
-            // Now calculate closest cell
-            let distance: Float = fabsf(visibleCenterPositionOfScrollView - cellCenter)
-            
-            let resize = CGFloat(distance) / imageCollectionView.bounds.width / 2 * 0.95
-            var resizePercentage = CGFloat(0.25)
-            if resize < 0.25 {
-                resizePercentage = resize
+        if scrollView == imageCollectionView {
+            collectionViewResizer.resizeCenteredItems(in: imageCollectionView)
+            if scrollSpeedEvaluator.isScrollingSlowly(scrollView) {
+                let focusedItemSection = snapHelper.getFocusedItemSection(imageCollectionView)
+                let index = IndexPath(row: 0, section: focusedItemSection)
+                let item = pictureDataSource[index]
+                switch item {
+                    case let .DataItem(picture):
+                        pictureFocusedSubject.onNext(picture)
+                    default:
+                        break
+                }
             }
-            
-            if let pictureCell = cell as? PictureCell {
-                var t = CGAffineTransform.identity
-                t = t.scaledBy(x: CGFloat(1 - resizePercentage), y: CGFloat(1 - resizePercentage))
-               
-                pictureCell.picture.transform = t
-                pictureCell.layer.shadowColor = UIColor.black.cgColor
-                pictureCell.layer.shadowOpacity = Float(1 - resizePercentage * 4)
-                pictureCell.layer.shadowOffset = CGSize.zero
-                pictureCell.layer.shadowRadius = 5
-                
-            }
-            
-            
-        }
-        
-        let currentOffset = scrollView.contentOffset
-        let currentTime = NSDate().timeIntervalSinceReferenceDate
-        let timeDiff = currentTime - lastOffsetCapture!
-        let captureInterval = 0.1
-        
-        if(timeDiff > captureInterval) {
-            
-            let distance = currentOffset.x - lastOffset!.x    // calc distance
-            let scrollSpeedNotAbs = (distance * 10) / 1000     // pixels per ms*10
-            let scrollSpeed = fabsf(Float(scrollSpeedNotAbs))  // absolute value
-
-            if (scrollSpeed > 0.3) {
-                isScrollingFast = true
-                print("Fast")
-            }
-            else {
-                isScrollingFast = false
-                print("Slow")
-            }
-            
-            lastOffset = currentOffset
-            lastOffsetCapture = currentTime
-            
         }
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        scrollToNearestVisibleCollectionViewCell()
+        if scrollView == imageCollectionView {
+            snapHelper.snap(imageCollectionView)
+        }
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-            scrollToNearestVisibleCollectionViewCell()
-        }
-    }
-    
-    func scrollToNearestVisibleCollectionViewCell() {
-        let visibleCenterPositionOfScrollView = Float(imageCollectionView.contentOffset.x + (self.imageCollectionView.bounds.size.width / 2))
-        var closestCellIndex = -1
-        var closestDistance: Float = .greatestFiniteMagnitude
-        for i in 0..<imageCollectionView.visibleCells.count {
-            let cell = imageCollectionView.visibleCells[i]
-            let cellWidth = cell.bounds.size.width
-            let cellCenter = Float(cell.frame.origin.x + cellWidth / 2)
-            
-            // Now calculate closest cell
-            let distance: Float = fabsf(visibleCenterPositionOfScrollView - cellCenter)
-            if distance < closestDistance {
-                closestDistance = distance
-                closestCellIndex = imageCollectionView.indexPath(for: cell)!.section
+        if scrollView == imageCollectionView {
+            if !decelerate {
+                snapHelper.snap(imageCollectionView)
             }
-        }
-        
-//        if closestCellIndex == 0 {
-//            closestCellIndex = 1
-//        }
-        
-        if closestCellIndex != -1 {
-            self.imageCollectionView.scrollToItem(at: IndexPath(row: 0, section: closestCellIndex), at: .centeredHorizontally, animated: true)
-            pictureSnapped(index: closestCellIndex)
         }
     }
 }

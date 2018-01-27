@@ -18,7 +18,7 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
     
     typealias ClearPreviousData = Bool
     
-    static let limit = 5
+    static let limit = 10
     
     let disposeBag = DisposeBag()
     
@@ -116,8 +116,8 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
                     let query = Query(systemType: "picture")
                         .add(key: "limit", value: limit)
                         .add(key: "skip", value: offset)
-                        .add(key: "elements.price[gte]", value: filter.minPrice)
-                        .add(key: "elements.price[lte]", value: filter.maxPrice)
+//                        .add(key: "elements.price[gte]", value: filter.minPrice)
+//                        .add(key: "elements.price[lte]", value: filter.maxPrice)
 //                        .add(key: "system.id[in]", value: "f99e2d6f-f6a4-4cc9-8ecd-02e10f1501c9" )
                         .build()
     

@@ -32,7 +32,8 @@ class Picture: Mappable {
         
         var systemId = ""
         systemId <- map["system.id"]
-        id = systemId
+//        id = systemId
+        id = randomString(length: 20)
         title = mapper.map(elementName: "title", elementType: TextElement.self)
         author = mapper.map(elementName: "author", elementType: TextElement.self)
         picture = mapper.map(elementName: "picture", elementType: AssetElement.self)
@@ -46,10 +47,26 @@ class Picture: Mappable {
 
 extension Picture: Equatable {
     static func == (lhs: Picture, rhs: Picture) -> Bool {
-        return lhs.title.value == rhs.title.value // TODO this should be replaced with ID
+        return lhs.id == rhs.id
     }
     
     static func != (lhs: Picture, rhs: Picture) -> Bool {
         return !(lhs == rhs)
     }
+}
+
+func randomString(length: Int) -> String {
+    
+    let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    let len = UInt32(letters.length)
+    
+    var randomString = ""
+    
+    for _ in 0 ..< length {
+        let rand = arc4random_uniform(len)
+        var nextChar = letters.character(at: Int(rand))
+        randomString += NSString(characters: &nextChar, length: 1) as String
+    }
+    
+    return randomString
 }
