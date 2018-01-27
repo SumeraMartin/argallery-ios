@@ -88,21 +88,21 @@ extension PictureDetailViewController {
         let translation = panGestureRecognizer.translation(in: nil)
         let progress = translation.y / 2 / picturesCollectionView.bounds.height
         switch panGestureRecognizer.state {
-        case .began:
-            hero_dismissViewController()
-        case .changed:
-            Hero.shared.update(progress)
-            if let cell = picturesCollectionView.visibleCells[0]  as? PictureDetailCell {
-                let currentPos = CGPoint(x: translation.x + view.center.x, y: translation.y + view.center.y)
-                Hero.shared.apply(modifiers: [.position(currentPos)], to: cell.imageView)
+            case .began:
+                hero_dismissViewController()
+            case .changed:
+                Hero.shared.update(progress)
+                if let cell = picturesCollectionView.visibleCells[0]  as? PictureDetailCell {
+                    let currentPos = CGPoint(x: translation.x + view.center.x, y: translation.y + view.center.y)
+                    Hero.shared.apply(modifiers: [.position(currentPos)], to: cell.imageView)
+                }
+            default:
+                if progress + panGestureRecognizer.velocity(in: nil).y / picturesCollectionView.bounds.height > 0.3 {
+                    Hero.shared.finish()
+                } else {
+                    Hero.shared.cancel()
+                }
             }
-        default:
-            if progress + panGestureRecognizer.velocity(in: nil).y / picturesCollectionView.bounds.height > 0.3 {
-                Hero.shared.finish()
-            } else {
-                Hero.shared.cancel()
-            }
-        }
     }
 }
 

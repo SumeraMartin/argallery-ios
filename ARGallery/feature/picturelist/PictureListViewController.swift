@@ -11,7 +11,7 @@ import NVActivityIndicatorView
 class PictureListViewController: BaseViewController, ReactorKit.View {
     
     typealias SectionType = AnimatableSectionModel<String, PictureSectionItem>
-    typealias RxDataSource = RxTableViewSectionedAnimatedDataSource<SectionType>
+    typealias RxDataSource = RxCollectionViewSectionedAnimatedDataSource<SectionType>
     
     @IBOutlet weak var retryButton: UIButton!
     
@@ -19,9 +19,11 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
     
     @IBOutlet weak var loadingView: NVActivityIndicatorView!
     
+    @IBOutlet weak var imageCollectionView: UICollectionView!
+    
     @IBOutlet weak var loadingContainer: UIView!
     
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var filterIcon: UIImageView!
     
     var refresher: UIRefreshControl!
     
@@ -39,7 +41,9 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         
         rxDataSource = dataSource()
         
-        tableView.delegate = self
+        imageCollectionView.delegate = self
+        imageCollectionView.decelerationRate = UIScrollViewDecelerationRateFast
+        imageCollectionView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
         
         reactor = assembler.reactorProvider.createPictureListReactor()
     }
@@ -61,7 +65,7 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                 let model = AnimatableSectionModel(model: footerItem.identity, items: [footerItem])
                 return dataItems + [model]
             }
-            .bind(to: tableView.rx.items(dataSource: self.rxDataSource))
+            .bind(to: imageCollectionView.rx.items(dataSource: self.rxDataSource))
             .disposed(by: self.disposeBag)
         
         reactor.state
@@ -83,16 +87,23 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                 }
             })
             .disposed(by: self.disposeBag)
-
+        
+        filterIcon.rx.tapGesture()
+            .when(.recognized)
+            .subscribe(onNext: { _ in
+                self.performSegue(withIdentifier: FilterViewController.sequeIdentifier, sender: nil)
+            })
+            .disposed(by: self.disposeBag)
+        
         refresher.rx.controlEvent(.valueChanged)
             .map { .refresh }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        tableView.rx
-            .reachedBottom()
-            .withLatestFrom(reactor.state.map { $0.isLoadMoreEnabled })
-            .filter { $0 }
+        imageCollectionView.rx.willDisplayCell
+            .map { _, indexPath in indexPath }
+            .withLatestFrom(reactor.state.map { $0.data }) { ($0, $1) }
+            .filter { indexAndData in indexAndData.0.section == indexAndData.1.count - 1 }
             .map { _ in .loadMore }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
@@ -107,11 +118,23 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         
-        if var destinationViewController = segue.destination as? PictureDetailViewController {
+        if let destinationViewController = segue.destination as? PictureDetailViewController {
             if let index = sender as? IndexPath {
                  destinationViewController.initialPictureIndex = index.section
             }
         }
+    }
+    
+    func pictureSnapped(index: Int) {
+        reactor!.state
+            .asObservable()
+            .take(1)
+            .map { $0.data }
+            .subscribe(onNext: { (data) in
+//                print(data[index])
+                print(index)
+            })
+            .disposed(by: self.disposeBag)
     }
 }
 
@@ -120,24 +143,12 @@ extension PictureListViewController {
         return RxDataSource(configureCell: { dataSource, tableView, indexPath, _ in
             switch dataSource[indexPath] {
                 case let .DataItem(picture):
-                    let cell = tableView.dequeueReusableCell(withIdentifier: PictureCell.identifier, for: indexPath) as! PictureCell
-                    cell.title.text = picture.title.value
-                    if cell.title.text == "" {
-                        cell.title.text = "Default"
-                    }
-                    
+                    let cell = self.imageCollectionView.dequeueReusableCell(withReuseIdentifier: PictureCell.identifier, for: indexPath) as! PictureCell
+
                     cell.picture.heroID = picture.id
                     
                     if let url = picture.pictureURL {
                         cell.picture.af_setImage(withURL: url )
-                        cell.background.af_setImage(withURL: url )
-                        
-                        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
-                        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-                        blurEffectView.alpha = 1
-                        blurEffectView.frame = cell.background.bounds
-                        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-                        cell.background.addSubview(blurEffectView)
                     }
                     
                     cell.picture.rx
@@ -146,11 +157,9 @@ extension PictureListViewController {
                         .subscribe(onNext: { _ in self.performSegue(withIdentifier: PictureDetailViewController.sequeIdentifier, sender: indexPath) })
                         .disposed(by: cell.disposeBagCell)
                     
-                    cell.selectionStyle = UITableViewCellSelectionStyle.none
-                    
                     return cell
                 case let .FooterItem(isLoading, isError):
-                    let cell = tableView.dequeueReusableCell(withIdentifier: LoadingCell.identifier, for: indexPath) as! LoadingCell
+                    let cell = self.imageCollectionView.dequeueReusableCell(withReuseIdentifier: LoadingMoreCell.identifier, for: indexPath) as! LoadingMoreCell
                     
                     if isLoading {
                         cell.setLoadingState()
@@ -158,31 +167,72 @@ extension PictureListViewController {
                         cell.setErrorState()
                     }
                     
-                    cell.errorButton.rx.tapGesture()
+                    cell.tryAgainButton.rx.tapGesture()
                         .when(.recognized)
                         .map { _ in .loadMore }
                         .debug("TAP")
                         .bind(to: self.reactor!.action)
                         .disposed(by: cell.disposeBagCell)
                     
-                    cell.selectionStyle = UITableViewCellSelectionStyle.none
-
                     return cell
+            }
+        }, configureSupplementaryView: { (dataSource, collectionView, kind, indexPath) in
+            switch dataSource[indexPath] {
+                case .DataItem(_):
+                    return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: PictureReusableView.identifier, for: indexPath) as! PictureReusableView
+                case .FooterItem(_, _):
+                    return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LoadingMoreReusableView.identifier, for: indexPath) as! LoadingMoreReusableView
             }
         })
     }
 }
 
-extension PictureListViewController : UITableViewDelegate {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        switch self.rxDataSource[indexPath] {
-            case .DataItem(_):
-                return 300
-            case .FooterItem(_, _):
-                return 128
-        }
+extension PictureListViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 300, height: collectionView.frame.height)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
     }
 }
 
+extension PictureListViewController: UIScrollViewDelegate {
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollToNearestVisibleCollectionViewCell()
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            scrollToNearestVisibleCollectionViewCell()
+        }
+    }
+    
+    func scrollToNearestVisibleCollectionViewCell() {
+        let visibleCenterPositionOfScrollView = Float(imageCollectionView.contentOffset.x + (self.imageCollectionView.bounds.size.width / 2))
+        var closestCellIndex = -1
+        var closestDistance: Float = .greatestFiniteMagnitude
+        for i in 0..<imageCollectionView.visibleCells.count {
+            let cell = imageCollectionView.visibleCells[i]
+            let cellWidth = cell.bounds.size.width
+            let cellCenter = Float(cell.frame.origin.x + cellWidth / 2)
+            
+            // Now calculate closest cell
+            let distance: Float = fabsf(visibleCenterPositionOfScrollView - cellCenter)
+            if distance < closestDistance {
+                closestDistance = distance
+                closestCellIndex = imageCollectionView.indexPath(for: cell)!.section
+            }
+        }
+        if closestCellIndex != -1 {
+            self.imageCollectionView.scrollToItem(at: IndexPath(row: 0, section: closestCellIndex), at: .centeredHorizontally, animated: true)
+            pictureSnapped(index: closestCellIndex)
+        }
+    }
+}
 
 

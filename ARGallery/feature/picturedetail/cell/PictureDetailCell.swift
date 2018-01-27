@@ -1,6 +1,6 @@
 import UIKit
 
-class PictureDetailCell: UICollectionViewCell {
+class PictureDetailCell: BaseCollectionViewCell {
     
     static let identifier = "picture_detail_cell"
     

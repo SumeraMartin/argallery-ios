@@ -4,14 +4,25 @@ import RxSwift
 import RxGesture
 import ReactorKit
 import TTRangeSlider
+import BEMCheckBox
 
 class FilterViewController: BaseViewController, ReactorKit.View  {
     
     static let sequeIdentifier = "show_filter_seque"
     
-    let priceFilterSubject = PublishSubject<PriceRange>()
+    let fontSize = CGFloat(16.0)
     
-    @IBOutlet weak var priceFilter: TTRangeSlider!
+    let priceRangeSubject = PublishSubject<PriceRange>()
+    
+    let yearRangeSubject = PublishSubject<YearRange>()
+
+    @IBOutlet weak var priceRange: TTRangeSlider!
+    
+    @IBOutlet weak var yearRange: TTRangeSlider!
+    
+    @IBOutlet weak var firstCategoryContainer: UIStackView!
+    
+    @IBOutlet weak var firstCategoryCheckbox: BEMCheckBox!
     
     @IBOutlet weak var closeButton: UIBarButtonItem!
     
@@ -28,15 +39,39 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
         let coverUp: HeroDefaultAnimationType = .uncover(direction: .up)
         heroModalAnimationType = .selectBy(presenting: coverDown, dismissing: coverUp)
         
-        priceFilter.delegate = self
+        priceRange.delegate = self
+        yearRange.delegate = self
+        
+        let currencyFormatter = NumberFormatter()
+        currencyFormatter.numberStyle = .currency
+        currencyFormatter.currencyCode = "EUR"
+        currencyFormatter.currencySymbol = "€"
+        currencyFormatter.maximumFractionDigits = 0
+        priceRange.numberFormatterOverride = currencyFormatter
+        priceRange.step = 25
+        priceRange.enableStep = true
+        priceRange.maxLabelFont = priceRange.maxLabelFont.withSize(fontSize)
+        priceRange.minLabelFont = priceRange.minLabelFont.withSize(fontSize)
+        
+        let yearFormatter = NumberFormatter()
+        yearFormatter.usesGroupingSeparator = false
+        yearRange.numberFormatterOverride = yearFormatter
+        yearRange.maxLabelFont = yearRange.maxLabelFont.withSize(fontSize)
+        yearRange.minLabelFont = yearRange.minLabelFont.withSize(fontSize)
         
         reactor = assembler.reactorProvider.createFilterReactor()
     }
     
     func bind(reactor: FilterReactor) {
-        priceFilterSubject
+        priceRangeSubject
             .debounce(RxTimeInterval(0.2), scheduler: MainScheduler.instance)
             .map { .priceRangeChanged(minPrice: $0.minPrice, maxPrice: $0.maxPrice) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        yearRangeSubject
+            .debounce(RxTimeInterval(0.2), scheduler: MainScheduler.instance)
+            .map { .yearRangeChanged(minYear: $0.minYear, maxYear: $0.maxYear) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -49,22 +84,40 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        firstCategoryContainer.rx.tapGesture()
+            .when(.recognized)
+            .map { _ in .firstCategoryChanged }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .take(1)
-            .subscribe(onNext: { state in
-                self.priceFilter.minValue = Float(state.defaultFilter.minPrice)
-                self.priceFilter.maxValue = Float(state.defaultFilter.maxPrice)
+            .map { $0.defaultFilter }
+            .subscribe(onNext: { filter in
+                self.priceRange.minValue = Float(filter.minPrice)
+                self.priceRange.maxValue = Float(filter.maxPrice)
+                self.yearRange.minValue = Float(filter.minYear)
+                self.yearRange.maxValue = Float(filter.maxYear)
             })
             .disposed(by: disposeBag)
         
         reactor.state
             .getChange { state in state.currentFilter }
             .subscribe(onNext: { filter in
-                if self.priceFilter.selectedMinimum != Float(filter.minPrice) {
-                    self.priceFilter.selectedMinimum = Float(filter.minPrice)
+                if self.priceRange.selectedMinimum != Float(filter.minPrice) {
+                    self.priceRange.selectedMinimum = Float(filter.minPrice)
                 }
-                if self.priceFilter.selectedMaximum != Float(filter.maxPrice) {
-                    self.priceFilter.selectedMaximum = Float(filter.maxPrice)
+                if self.priceRange.selectedMaximum != Float(filter.maxPrice) {
+                    self.priceRange.selectedMaximum = Float(filter.maxPrice)
+                }
+                if self.yearRange.selectedMinimum != Float(filter.minYear) {
+                    self.yearRange.selectedMinimum = Float(filter.minYear)
+                }
+                if self.yearRange.selectedMaximum != Float(filter.maxYear) {
+                    self.yearRange.selectedMaximum = Float(filter.maxYear)
+                }
+                if self.firstCategoryCheckbox.on != filter.firstCategoryEnabled {
+                    self.firstCategoryCheckbox.setOn(filter.firstCategoryEnabled, animated: true)
                 }
             })
             .disposed(by: disposeBag)
@@ -72,15 +125,29 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
 }
 
 extension FilterViewController: TTRangeSliderDelegate {
-
+    
     struct PriceRange {
         var minPrice: Int
         var maxPrice: Int
     }
     
+    struct YearRange {
+        var minYear: Int
+        var maxYear: Int
+    }
+    
     func rangeSlider(_ sender: TTRangeSlider!, didChangeSelectedMinimumValue selectedMinimum: Float, andMaximumValue selectedMaximum: Float) {
-        let price = PriceRange(minPrice: Int(selectedMinimum), maxPrice: Int(selectedMaximum))
-        priceFilterSubject.on(.next(price))
+        
+        if sender === priceRange {
+            let price = PriceRange(minPrice: Int(selectedMinimum), maxPrice: Int(selectedMaximum))
+            priceRangeSubject.on(.next(price))
+        }
+        
+        if sender === yearRange {
+            let year = YearRange(minYear: Int(selectedMinimum), maxYear: Int(selectedMaximum))
+            yearRangeSubject.on(.next(year))
+        }
+        
     }
     
 }

@@ -34,8 +34,6 @@ class FilterService: BaseService, FilterServiceType {
     }
     
     func setFilter(filter: Filter) -> Observable<Filter> {
-        print(filter)
-        
         filterSubject.on(.next(filter))
         return Observable.just(filter)
     }

@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Assets.xcassets">
+      location = "group:/Users/martin/Documents/Projects/argallery/ARGallery/ARGallery/Assets.xcassets">
    </FileRef>
    <FileRef
       location = "group:ARGallery.xcodeproj">

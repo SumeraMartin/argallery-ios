@@ -19,4 +19,5 @@ target ‘ARGallery’ do
     pod 'AlamofireImage', '~> 3.3'
     pod 'Hero'
     pod 'TTRangeSlider'
+    pod 'BEMCheckBox'
 end
