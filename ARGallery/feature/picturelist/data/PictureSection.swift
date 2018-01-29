@@ -7,17 +7,24 @@ enum PictureSectionItem {
     case endEdgePadding
 }
 
+class PictureSectionItemId {
+    
+    static let startEdgePaddingId = "START_EDGE_PADDING"
+    static let endEdgePaddingId = "END_EDGE_PADDING"
+    static let loadMoreId = "LOAD_MORE_ID"
+}
+
 extension PictureSectionItem: IdentifiableType, Equatable {
     var identity : String {
         switch self {
             case let .DataItem(picture):
                 return picture.id
             case .FooterItem(_):
-                return "FOOTER_ID"
+                return PictureSectionItemId.loadMoreId
             case .startEdgePadding:
-                return "START_EDGE_PADDING"
+                return PictureSectionItemId.startEdgePaddingId
             case .endEdgePadding:
-                return "END_EDGE_PADDING"
+                return PictureSectionItemId.endEdgePaddingId
         }
     }
     

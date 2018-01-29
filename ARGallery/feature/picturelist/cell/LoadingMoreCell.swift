@@ -3,7 +3,7 @@ import NVActivityIndicatorView
 import RxSwift
 import RxCocoa
 
-class LoadingMoreCell: BaseCollectionViewCell {
+class LoadingMoreCell: BaseCollectionViewCell, SnappableCell {
     
     static let identifier = "loading_more_cell"
     
@@ -11,15 +11,17 @@ class LoadingMoreCell: BaseCollectionViewCell {
     
     @IBOutlet weak var tryAgainButton: UIButton!
     
+    @IBOutlet weak var errorContainer: UIStackView!
+    
     func setLoadingState() {
         loadingView.isHidden = false
         loadingView.startAnimating()
-        tryAgainButton.isHidden = true
+        errorContainer.isHidden = true
     }
     
     func setErrorState() {
         loadingView.isHidden = true
         loadingView.stopAnimating()
-        tryAgainButton.isHidden = false
+        errorContainer.isHidden = false
     }
 }

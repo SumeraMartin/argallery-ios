@@ -3,144 +3,141 @@ import KenticoCloud
 
 protocol PictureCloudServiceType {
     
-    func getLoadingStateObservable() -> Observable<PictureLoadingState>
+    func getLoadingStateWithDataObservable() -> Observable<LoadingStateWithPictures>
     
-    func getPicturesObservable() -> Observable<[Picture]>
+    func getLoadingStateWithDataSingle() -> Single<LoadingStateWithPictures>
     
     func getPictures() -> [Picture]
     
-    func load() -> Observable<Void>
+    func loadMore() -> Single<Void>
     
-    func loadMore() -> Observable<Void>
+    func reload() -> Single<Void>
 }
 
 class PictureCloudService: BaseService, PictureCloudServiceType {
     
-    typealias ClearPreviousData = Bool
+    typealias ReloadData = Bool
     
-    static let limit = 10
+    static let limit = 1
     
-    let disposeBag = DisposeBag()
+    let startLoadingSubject = PublishSubject<ReloadData>()
     
-    let startLoadingSubject = PublishSubject<ClearPreviousData>()
-    
-    let pictureSubject = BehaviorSubject<[Picture]>(value: [])
-    
-    let pictureLoadingStateSubject = BehaviorSubject(value: PictureLoadingState.Inactive)
+    let stateSubject = BehaviorSubject(value: LoadingStateWithPictures.createDefault())
     
     override init(provider: ServiceProviderType) {
         super.init(provider: provider)
         
-        subscribeToNotifier()
+        initializeSubscription()
     }
     
-    func getLoadingStateObservable() -> Observable<PictureLoadingState> {
-        return pictureLoadingStateSubject.asObservable()
+    func getLoadingStateWithDataObservable() -> Observable<LoadingStateWithPictures> {
+        return stateSubject.asObservable()
     }
     
-    func getPicturesObservable() -> Observable<[Picture]> {
-        return pictureSubject.asObservable()
+    func getLoadingStateWithDataSingle() -> Single<LoadingStateWithPictures> {
+        return stateSubject.take(1).asSingle()
     }
     
     func getPictures() -> [Picture] {
         do {
-            return try pictureSubject.value()
+            let state = try stateSubject.value()
+            return state.data
         } catch {
             fatalError("Picture subject without data")
         }
     }
     
-    func load() -> Observable<Void> {
-        startLoadingSubject.onNext(true)
-        return Observable.just(Void())
-    }
-    
-    func loadMore() -> Observable<Void> {
+    func loadMore() -> Single<Void> {
         startLoadingSubject.onNext(false)
-        return Observable.just(Void())
+        return Single.just(Void())
     }
     
-    private func subscribeToNotifier() {
+    func reload() -> Single<Void> {
+        startLoadingSubject.onNext(true)
+        return Single.just(Void())
+    }
+    
+    private func initializeSubscription() {
         startLoadingSubject
-            .flatMap { clearPreviousData -> Observable<[Picture]> in
-                if clearPreviousData == false {
-                    return self.getLoadingStateObservable()
-                        .take(1)
-                        .flatMap { state -> Observable<[Picture]> in
-                            if state.isAllowedToLoadMore() {
-                                return self.getPicturesObservable().take(1)
-                            }
-                            fatalError("This should never happen")
-                        }
+            .withLatestFrom(self.stateSubject) { reloadData, state -> LoadingStateWithPictures in
+                var state = state
+                if reloadData {
+                    state.data = []
                 }
-                return Observable.just([])
+                return state
             }
-            .do(onNext: { previousData in
-                if previousData.count == 0 {
-                    self.pictureLoadingStateSubject.onNext(.InitialLoading)
-                } else {
-                    self.pictureLoadingStateSubject.onNext(.MoreLoading)
-                }
+            .withLatestFrom(self.provider.filterService.getCurrentFilterOnce()) { state, filter in
+                return (state, filter)
+            }
+            
+            .flatMapLatest { stateAndFilter -> Observable<LoadingStateWithPictures> in
+                var (state, filter) = stateAndFilter
+                state.loadingState = .loading
+                
+                let loadingStateWithPreviousDataObservable = Observable.just(state)
+                let loadPicturesObservable = self.getPictures(loadingStateWithPictures: state, filter: filter)
+                return Observable.merge(loadPicturesObservable, loadingStateWithPreviousDataObservable)
+            }
+            .subscribe(onNext: { loadingStateWithPictures in
+                self.stateSubject.onNext(loadingStateWithPictures)
             })
-            .flatMapLatest { previousData in
-                return self.provider.filterService
-                    .getCurrentFilterOnce()
-                    .flatMap { filter -> Observable<Result<[Picture]>> in
-                        let limit = PictureCloudService.limit
-                        let offset = previousData.count
-                        return self.getPictures(offset: offset, limit: limit, filter: filter)
-                    }
-                    .do(onNext: { result in
-                        result.flatMap(success: { pictures in
-                            self.pictureLoadingStateSubject.onNext(.Inactive)
-                            let newData = previousData + pictures + pictures + pictures + pictures
-                            self.pictureSubject.onNext(newData)
-                        }, failure: { _ in
-                            if previousData.count == 0 {
-                                self.pictureLoadingStateSubject.onNext(.InitialError)
-                            } else {
-                                self.pictureLoadingStateSubject.onNext(.MoreError)
-                            }
-                        })
-                    })
-            }
-            .subscribe()
             .disposed(by: disposeBag)
     }
     
-    private func getPictures(offset: Int, limit: Int, filter: Filter = Filter.createDefault()) -> Observable<Result<[Picture]>> {
+    private func getPictures(loadingStateWithPictures: LoadingStateWithPictures, filter: Filter) -> Observable<LoadingStateWithPictures> {
         return provider.kenticoClientService
             .getClient()
-            .flatMap { client in
-                return Observable.create { observer in
-                    let query = Query(systemType: "picture")
-                        .add(key: "limit", value: limit)
-                        .add(key: "skip", value: offset)
-//                        .add(key: "elements.price[gte]", value: filter.minPrice)
-//                        .add(key: "elements.price[lte]", value: filter.maxPrice)
-//                        .add(key: "system.id[in]", value: "f99e2d6f-f6a4-4cc9-8ecd-02e10f1501c9" )
-                        .build()
-    
-                    client.getItems(modelType: Picture.self, customQuery: query) { (isSuccess, itemsResponse, error) in
-                        if isSuccess {
-                            if let pictures = itemsResponse?.items {
-                                observer.onNext(Result.Success(pictures))
-                            } else {
-                               fatalError("Kentico client successful response without items")
-                            }
-                        } else {
-                            if let error = error {
-                                observer.onNext(Result.Failure(error))
-                            } else {
-                                fatalError("Kentico client unsuccessful response without error")
-                            }
+            .flatMap { client -> Observable<Result<[CloudPicture]>> in
+                let limit = PictureCloudService.limit
+                let offset = loadingStateWithPictures.data.count + 1
+                return self.fetchData(offset: offset, limit: limit, filter: filter, client: client)
+            }
+            .map { result in result.map { pictures in pictures.map { $0.toPicture() } } }
+            .map { result in
+                switch result {
+                    case let .Success(data):
+                        if data.count == 0 {
+                            return LoadingStateWithPictures(loadingState: .completed, data: loadingStateWithPictures.data)
                         }
-                        observer.onCompleted()
-                    }
-                    
-                    return Disposables.create()
+                        return LoadingStateWithPictures(loadingState: .inactive, data: loadingStateWithPictures.data + data)
+                    case .Failure(_):
+                        return LoadingStateWithPictures(loadingState: .error, data: loadingStateWithPictures.data)
                 }
             }
             .delay(RxTimeInterval(5), scheduler: MainScheduler.instance)
+    }
+    
+    private func fetchData(offset: Int, limit: Int, filter: Filter, client: DeliveryClient) -> Observable<Result<[CloudPicture]>> {
+        return Observable.create { observer in
+            let query = self.createQuery(offset: offset, limit: limit, filter: filter)
+            client.getItems(modelType: CloudPicture.self, customQuery: query) { (isSuccess, itemsResponse, error) in
+                if isSuccess {
+                    if let pictures = itemsResponse?.items {
+                        observer.onNext(Result.Success(pictures))
+                    } else {
+                        fatalError("Kentico client successful response without items")
+                    }
+                } else {
+                    if let error = error {
+                        observer.onNext(Result.Failure(error))
+                    } else {
+                        fatalError("Kentico client unsuccessful response without error")
+                    }
+                }
+                observer.onCompleted()
+            }
+            
+            return Disposables.create()
+        }
+    }
+    
+    private func createQuery(offset: Int, limit: Int, filter: Filter) -> String {
+        return Query(systemType: "picture")
+            .add(key: "limit", value: limit)
+            .add(key: "skip", value: offset)
+            //                        .add(key: "elements.price[gte]", value: filter.minPrice)
+            //                        .add(key: "elements.price[lte]", value: filter.maxPrice)
+            //                        .add(key: "system.id[in]", value: "f99e2d6f-f6a4-4cc9-8ecd-02e10f1501c9" )
+            .build()
     }
 }

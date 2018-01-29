@@ -1,10 +1,10 @@
 import UIKit
 
-class CollectionViewResizer {
+class CollectionCellsTransformer {
     
     let resizeLimit = 1 / CGFloat(4)
     
-    func resizeCenteredItems(in collectionView: UICollectionView) {
+    func transformByDistanceFromCenter(in collectionView: UICollectionView) {
         let halfCollectionWidth = collectionView.bounds.size.width / 2
         let visibleCenterPositionOfScrollView = Float(collectionView.contentOffset.x + halfCollectionWidth)
         for cell in collectionView.visibleCells {

@@ -4,7 +4,7 @@ class ScrollSpeedEvaluator {
     
     let captureInterval = 0.1
     
-    let slowScrollingThreshold = Float(0.3)
+    let slowScrollingThreshold = Float(0.5)
     
     var lastOffset = CGPoint(x: 0, y: 0)
     
@@ -21,7 +21,9 @@ class ScrollSpeedEvaluator {
             let distance = currentOffset.x - lastOffset.x
             let scrollSpeed = fabsf(Float((distance * 10) / 1000))
             
-            lastIsSrollingSlowlyState = scrollSpeed > slowScrollingThreshold
+            print(scrollSpeed)
+            
+            lastIsSrollingSlowlyState = scrollSpeed < slowScrollingThreshold
             lastOffset = currentOffset
             lastOffsetTime = currentTime
         }

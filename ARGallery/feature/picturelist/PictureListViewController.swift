@@ -15,25 +15,17 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
     typealias PictureSectionType = AnimatableSectionModel<String, PictureSectionItem>
     typealias RxPictureDataSource = RxCollectionViewSectionedAnimatedDataSource<PictureSectionType>
     
-    @IBOutlet weak var retryButton: UIButton!
-    
-    @IBOutlet weak var errorContainer: UIView!
-    
-    @IBOutlet weak var loadingView: NVActivityIndicatorView!
-    
     @IBOutlet weak var imageCollectionView: UICollectionView!
     
     @IBOutlet weak var infoCollectionView: UICollectionView!
-    
-    @IBOutlet weak var loadingContainer: UIView!
     
     @IBOutlet weak var filterIcon: UIImageView!
     
     let scrollSpeedEvaluator = ScrollSpeedEvaluator()
     
-    let collectionViewResizer = CollectionViewResizer()
+    let collectionViewTransformer = CollectionCellsTransformer()
     
-    let snapHelper = SnapHelper()
+    let focusedItemEvaluator = FocusedItemEvaluator()
     
     let pictureFocusedSubject = PublishSubject<Picture>()
     
@@ -59,59 +51,41 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         infoCollectionView.delegate = self
         
         imageCollectionView.delegate = self
+        imageCollectionView.decelerationRate = 10
         imageCollectionView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
         
         reactor = assembler.reactorProvider.createPictureListReactor()
+        
+        transformCellsByDistanceFromCenter()
     }
     
     func bind(reactor: PictureListReactor) {
-        let dataSectionObservable = reactor.state
-            .getChange { $0.data }
-            .map { $0.map { AnimatableSectionModel(model: $0.id, items: [PictureSectionItem.DataItem(item: $0)]) } }
-        
-        let isLoadingMoreObservable = reactor.state
-            .getChange { $0.isLoadingMore }
-        
-        let isLoadingMoreErrorObservable = reactor.state
-            .getChange { $0.isLoadingMoreError }
-        
-        Observable.combineLatest(dataSectionObservable, isLoadingMoreObservable, isLoadingMoreErrorObservable)
-            .map { (dataItems, isLoadingMore, isLoadingMoreError) in
-                let footerItem = PictureSectionItem.FooterItem(isLoading: isLoadingMore, isError: isLoadingMoreError)
-                let model = AnimatableSectionModel(model: footerItem.identity, items: [footerItem])
-                
-                let startPaddingModel = AnimatableSectionModel(model: PictureSectionItem.startEdgePadding.identity, items: [PictureSectionItem.startEdgePadding])
-                
-                let endPaddingModel = AnimatableSectionModel(model: PictureSectionItem.endEdgePadding.identity, items: [PictureSectionItem.endEdgePadding])
-                
-                return [startPaddingModel] + dataItems + [model] + [endPaddingModel]
+        let dataObservable = reactor.state.getChange { $0.data }
+        let errorObservable = reactor.state.getChange { $0.isError }
+        let loadingObservable = reactor.state.getChange { $0.isLoading }
+        let loadingMoreEnabledObservable = reactor.state.getChange { $0.isMoreLoadingEnabled }
+       
+        Observable.combineLatest(dataObservable, errorObservable, loadingObservable) { ($0, $1, $2) }
+            .map { dataErrorLoading in
+                let (data, isError, isLoading) = dataErrorLoading
+                return self.createPictureSectionModels(data: data, isError: isError, isLoading: isLoading)
             }
             .bind(to: imageCollectionView.rx.items(dataSource: self.pictureDataSource))
             .disposed(by: self.disposeBag)
         
-        reactor.state
-            .getChange { $0.data }
+        dataObservable
             .map { $0.map { AnimatableSectionModel(model: $0.id, items: [PictureInfoSectionItem.pictureInfo(picture: $0)]) } }
             .bind(to: infoCollectionView.rx.items(dataSource: self.pictureInfoDataSource))
             .disposed(by: self.disposeBag)
         
         reactor.state
-            .getChange { $0.isLoadingMainError }
-            .subscribe(onNext: { (isMainError) in
-                self.errorContainer.isHidden = !isMainError
-            })
-            .disposed(by: self.disposeBag)
-        
-        reactor.state
-            .getChange { $0.isLoadingMain }
-            .subscribe(onNext: { (isLoading) in
-                if isLoading {
-                    self.loadingView.startAnimating()
-                    self.loadingContainer.isHidden = false
-                } else {
-                    self.loadingView.stopAnimating()
-                    self.loadingContainer.isHidden = true
-                }
+            .getChange { $0.focusedPicture }
+            .filter { $0 != nil }
+            .withLatestFrom(reactor.state.map { $0.data }) { picture, data in self.getIndex(data, picture!) }
+            .map { self.addOffsetToPicturesIndex($0) }
+            .subscribe(onNext: { index in
+                self.imageCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
+                self.transformCellsByDistanceFromCenter()
             })
             .disposed(by: self.disposeBag)
         
@@ -142,8 +116,9 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         
         imageCollectionView.rx.willDisplayCell
             .map { _, indexPath in indexPath }
-            .withLatestFrom(reactor.state.map { $0.data }) { ($0, $1) }
-            .filter { indexAndData in indexAndData.0.section == indexAndData.1.count - 1 }
+            .filter { index in self.pictureDataSource[index].identity == PictureSectionItemId.endEdgePaddingId }
+            .withLatestFrom(reactor.state) { _, state in state }
+            .filter { state in state.isMoreLoadingEnabled }
             .map { _ in .loadMore }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
@@ -159,8 +134,8 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         super.prepare(for: segue, sender: sender)
         
         if let destinationViewController = segue.destination as? PictureDetailViewController {
-            if let index = sender as? IndexPath {
-                 destinationViewController.initialPictureIndex = index.section
+            if let picture = sender as? Picture {
+                 destinationViewController.initialPicture = picture
             }
         }
     }
@@ -176,6 +151,36 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
     }
+    
+    private func createPictureSectionModels(data: [Picture], isError: Bool, isLoading: Bool) -> [PictureSectionType] {
+        let dataItems = data.map { PictureSectionItem.DataItem(item: $0) }
+        let dataModels = dataItems.map { AnimatableSectionModel(model: $0.identity, items: [$0]) }
+        let loadingMoreItem = PictureSectionItem.FooterItem(isLoading: isLoading, isError: isError)
+        let loadingMoreModel = AnimatableSectionModel(model: loadingMoreItem.identity, items: [loadingMoreItem])
+        let startPaddingModel = AnimatableSectionModel(model: PictureSectionItem.startEdgePadding.identity, items: [PictureSectionItem.startEdgePadding])
+        let endPaddingModel = AnimatableSectionModel(model: PictureSectionItem.endEdgePadding.identity, items: [PictureSectionItem.endEdgePadding])
+        
+        var models = [startPaddingModel] + dataModels
+        if isLoading != false || isError != false {
+            models += [loadingMoreModel]
+        }
+        return models + [endPaddingModel]
+    }
+    
+    private func getIndex(_ pictures: [Picture], _ picture: Picture) -> IndexPath {
+        let index = pictures.index(of: picture)
+        guard let safeIndex = index else {
+            fatalError("Unknown picture \(picture)")
+        }
+        let intIndex = pictures.distance(from: pictures.startIndex, to: safeIndex)
+        return IndexPath(row: 0, section: intIndex)
+    }
+    
+    private func addOffsetToPicturesIndex(_ indexPath: IndexPath) -> IndexPath {
+        var index = indexPath
+        index.section = indexPath.section + 1
+        return index
+    }
 }
 
 extension PictureListViewController {
@@ -187,14 +192,14 @@ extension PictureListViewController {
 
                     cell.picture.heroID = picture.id
                     
-                    if let url = picture.pictureURL {
-                        cell.picture.af_setImage(withURL: url )
+                    if let url = picture.url {
+                        cell.picture.af_setImage(withURL: url)
                     }
                     
                     cell.picture.rx
                         .tapGesture()
                         .when(.recognized)
-                        .subscribe(onNext: { _ in self.performSegue(withIdentifier: PictureDetailViewController.sequeIdentifier, sender: indexPath) })
+                        .subscribe(onNext: { _ in self.performSegue(withIdentifier: PictureDetailViewController.sequeIdentifier, sender: picture) })
                         .disposed(by: cell.disposeBagCell)
                     
                     return cell
@@ -221,16 +226,7 @@ extension PictureListViewController {
                     return self.imageCollectionView.dequeueReusableCell(withReuseIdentifier: PaddingCell.identifier, for: indexPath)
             }
         }, configureSupplementaryView: { (dataSource, collectionView, kind, indexPath) in
-            switch dataSource[indexPath] {
-                case .DataItem(_):
-                    return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: PictureReusableView.identifier, for: indexPath) as! PictureReusableView
-                case .FooterItem(_, _):
-                    return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LoadingMoreReusableView.identifier, for: indexPath) as! LoadingMoreReusableView
-                case .startEdgePadding:
-                    return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LoadingMoreReusableView.identifier, for: indexPath) as! LoadingMoreReusableView
-                case .endEdgePadding:
-                    return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LoadingMoreReusableView.identifier, for: indexPath) as! LoadingMoreReusableView
-            }
+            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: DummyReusableView.identifier, for: indexPath)
         })
     }
 }
@@ -241,13 +237,11 @@ extension PictureListViewController {
             switch dataSource[indexPath] {
                 case let .pictureInfo(picture):
                     let cell = self.infoCollectionView.dequeueReusableCell(withReuseIdentifier: PictureInfoCell.identifier, for: indexPath) as! PictureInfoCell
-                    
-                    cell.title.text = picture.title.value
-                    
+                    cell.bind(picture: picture)
                     return cell
             }
         }, configureSupplementaryView: { (dataSource, collectionView, kind, indexPath) in
-            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: PictureReusableView.identifier, for: indexPath) as! PictureReusableView
+            return collectionView.getDummyReusableCell(ofKind: kind, forIndex: indexPath)
         })
     }
 }
@@ -255,10 +249,16 @@ extension PictureListViewController {
 extension PictureListViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == imageCollectionView {
-            if indexPath.section == 0 {
-                return CGSize(width: 150, height: collectionView.frame.height)
+            switch pictureDataSource[indexPath] {
+                case .startEdgePadding:
+                    return CGSize(width: 150, height: collectionView.frame.height)
+                case .endEdgePadding:
+                    return CGSize(width: 50, height: collectionView.frame.height)
+                case .FooterItem(_, isError: _):
+                    return CGSize(width: 225, height: collectionView.frame.height)
+                default:
+                    return CGSize(width: 300, height: collectionView.frame.height)
             }
-            return CGSize(width: 300, height: collectionView.frame.height)
         }
         
         if collectionView == infoCollectionView {
@@ -273,16 +273,19 @@ extension PictureListViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == imageCollectionView {
-            collectionViewResizer.resizeCenteredItems(in: imageCollectionView)
+            
+            transformCellsByDistanceFromCenter()
+            
             if scrollSpeedEvaluator.isScrollingSlowly(scrollView) {
-                let focusedItemSection = snapHelper.getFocusedItemSection(imageCollectionView)
-                let index = IndexPath(row: 0, section: focusedItemSection)
-                let item = pictureDataSource[index]
-                switch item {
-                    case let .DataItem(picture):
-                        pictureFocusedSubject.onNext(picture)
-                    default:
-                        break
+                if let focusedItemSection = focusedItemEvaluator.getFocusedItemSection(imageCollectionView) {
+                    let index = IndexPath(row: 0, section: focusedItemSection)
+                    let item = pictureDataSource[index]
+                    switch item {
+                        case let .DataItem(picture):
+                            pictureFocusedSubject.onNext(picture)
+                        default:
+                            break
+                    }
                 }
             }
         }
@@ -290,16 +293,18 @@ extension PictureListViewController: UIScrollViewDelegate {
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if scrollView == imageCollectionView {
-            snapHelper.snap(imageCollectionView)
+            focusedItemEvaluator.snapToFocusedItem(imageCollectionView)
         }
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if scrollView == imageCollectionView {
-            if !decelerate {
-                snapHelper.snap(imageCollectionView)
-            }
+        if scrollView == imageCollectionView  && !decelerate {
+            focusedItemEvaluator.snapToFocusedItem(imageCollectionView)
         }
+    }
+    
+    func transformCellsByDistanceFromCenter() {
+        collectionViewTransformer.transformByDistanceFromCenter(in: imageCollectionView)
     }
 }
 

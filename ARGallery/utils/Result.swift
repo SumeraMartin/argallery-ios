@@ -18,6 +18,13 @@ enum Result<VALUE> {
         }
     }
     
+    func map<R>(block: (VALUE) -> R) -> Result<R> {
+        switch self {
+            case let .Success(value): return .Success(block(value))
+            case let .Failure(error) : return .Failure(error)
+        }
+    }
+    
     func flatMap(success: ((VALUE) -> ()), failure: ((Error) -> ())) {
         switch self {
             case let .Success(a):

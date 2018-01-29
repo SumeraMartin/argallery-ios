@@ -7,7 +7,7 @@ class BaseViewController: UIViewController, AppAssemblerClient {
     var assembler: AppAssemblerType!
     
     var disposeBag = DisposeBag()
-
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
