@@ -105,6 +105,9 @@ extension PictureDetailViewController {
                     cell.pictureView.bounds = cell.bounds
                     cell.pictureScrollViewContainer.bounds = cell.bounds
                     
+                    cell.descriptionTableView.delegate = cell
+                    cell.bind()
+                    
                     cell.pictureView.contentMode = .scaleAspectFill
                     cell.pictureScrollViewContainer.delegate = cell
                     cell.pictureScrollViewContainer.maximumZoomScale = 3

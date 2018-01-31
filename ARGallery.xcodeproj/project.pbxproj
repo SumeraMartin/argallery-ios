@@ -10,6 +10,10 @@
 		076605CDC1E21D07564BD512 /* Pods_ARGallery.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EAE26ECF359D5106D2D79BA /* Pods_ARGallery.framework */; };
 		5B102740201F848900E9BE4C /* UICollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B10273F201F848900E9BE4C /* UICollectionView.swift */; };
 		5B102742201F9B3C00E9BE4C /* LoadingStateWithPictures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B102741201F9B3C00E9BE4C /* LoadingStateWithPictures.swift */; };
+		5B3B9DE02021071900FE629D /* DescriptionBotomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DDF2021071900FE629D /* DescriptionBotomSheetCell.swift */; };
+		5B3B9DE22021077300FE629D /* BaseTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DE12021077300FE629D /* BaseTableViewCell.swift */; };
+		5B3B9DE420210B7400FE629D /* BottomSheetSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DE320210B7400FE629D /* BottomSheetSectionItem.swift */; };
+		5B3B9DE620210FDA00FE629D /* TableViewWithTransparentHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DE520210FDA00FE629D /* TableViewWithTransparentHeader.swift */; };
 		5B3D2839200FF51200143733 /* CloudPicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3D2838200FF51200143733 /* CloudPicture.swift */; };
 		5B424CE3201CC56600BF1CD9 /* PaddingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B424CE2201CC56600BF1CD9 /* PaddingCell.swift */; };
 		5B424CE5201CE9D100BF1CD9 /* PictureInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B424CE4201CE9D100BF1CD9 /* PictureInfoCell.swift */; };
@@ -31,6 +35,8 @@
 		5B88E7802014CF3E00502F97 /* PictureDetailReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E77F2014CF3E00502F97 /* PictureDetailReactor.swift */; };
 		5B88E7832014FAD900502F97 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E7822014FAD900502F97 /* Query.swift */; };
 		5BAB92E7201A5B0E00EDC2C9 /* DummyReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAB92E6201A5B0E00EDC2C9 /* DummyReusableView.swift */; };
+		5BAC222D20226406009D8983 /* TitleBottomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */; };
+		5BAC222F20226458009D8983 /* DetailsBotomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */; };
 		5BAC7E112010908E00F33F1A /* PictureListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E102010908E00F33F1A /* PictureListViewController.swift */; };
 		5BAC7E142010920800F33F1A /* ServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E132010920800F33F1A /* ServiceProvider.swift */; };
 		5BAC7E172010924900F33F1A /* PictureCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E162010924900F33F1A /* PictureCloudService.swift */; };
@@ -64,6 +70,10 @@
 		331EB1113A8BD5570B5BF501 /* Pods-ARGallery.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARGallery.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARGallery/Pods-ARGallery.debug.xcconfig"; sourceTree = "<group>"; };
 		5B10273F201F848900E9BE4C /* UICollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICollectionView.swift; sourceTree = "<group>"; };
 		5B102741201F9B3C00E9BE4C /* LoadingStateWithPictures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingStateWithPictures.swift; sourceTree = "<group>"; };
+		5B3B9DDF2021071900FE629D /* DescriptionBotomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescriptionBotomSheetCell.swift; sourceTree = "<group>"; };
+		5B3B9DE12021077300FE629D /* BaseTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableViewCell.swift; sourceTree = "<group>"; };
+		5B3B9DE320210B7400FE629D /* BottomSheetSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetSectionItem.swift; sourceTree = "<group>"; };
+		5B3B9DE520210FDA00FE629D /* TableViewWithTransparentHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewWithTransparentHeader.swift; sourceTree = "<group>"; };
 		5B3D2838200FF51200143733 /* CloudPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPicture.swift; sourceTree = "<group>"; };
 		5B424CE1201BADD800BF1CD9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = /Users/martin/Documents/Projects/argallery/ARGallery/ARGallery/Assets.xcassets; sourceTree = "<absolute>"; };
 		5B424CE2201CC56600BF1CD9 /* PaddingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingCell.swift; sourceTree = "<group>"; };
@@ -86,6 +96,8 @@
 		5B88E77F2014CF3E00502F97 /* PictureDetailReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDetailReactor.swift; sourceTree = "<group>"; };
 		5B88E7822014FAD900502F97 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		5BAB92E6201A5B0E00EDC2C9 /* DummyReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyReusableView.swift; sourceTree = "<group>"; };
+		5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBottomSheetCell.swift; sourceTree = "<group>"; };
+		5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsBotomSheetCell.swift; sourceTree = "<group>"; };
 		5BAC7E102010908E00F33F1A /* PictureListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureListViewController.swift; sourceTree = "<group>"; };
 		5BAC7E132010920800F33F1A /* ServiceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProvider.swift; sourceTree = "<group>"; };
 		5BAC7E162010924900F33F1A /* PictureCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureCloudService.swift; sourceTree = "<group>"; };
@@ -184,6 +196,7 @@
 				5B79B256201CFFCF00680951 /* ScrollSpeedEvaluator.swift */,
 				5B79B25A201D078900680951 /* FocusedItemEvaluator.swift */,
 				5B79B258201D02D600680951 /* CollectionCellsTransformer.swift */,
+				5B3B9DE520210FDA00FE629D /* TableViewWithTransparentHeader.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -214,6 +227,16 @@
 				5B88E7822014FAD900502F97 /* Query.swift */,
 			);
 			path = kentico;
+			sourceTree = "<group>";
+		};
+		5BAC222B202263E9009D8983 /* bottomsheet */ = {
+			isa = PBXGroup;
+			children = (
+				5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */,
+				5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */,
+				5B3B9DDF2021071900FE629D /* DescriptionBotomSheetCell.swift */,
+			);
+			path = bottomsheet;
 			sourceTree = "<group>";
 		};
 		5BAC7E0E2010905700F33F1A /* view */ = {
@@ -286,6 +309,7 @@
 				5BAC7E2A20109C1100F33F1A /* BaseReactor.swift */,
 				5BAC7E2C2010AA7300F33F1A /* BaseViewController.swift */,
 				5B88E77D2014CCC200502F97 /* BaseCollectionViewCell.swift */,
+				5B3B9DE12021077300FE629D /* BaseTableViewCell.swift */,
 			);
 			path = base;
 			sourceTree = "<group>";
@@ -371,6 +395,7 @@
 			isa = PBXGroup;
 			children = (
 				5BC75F6D2017BDBE00A595AE /* PictureDetailSectionItem.swift */,
+				5B3B9DE320210B7400FE629D /* BottomSheetSectionItem.swift */,
 			);
 			path = data;
 			sourceTree = "<group>";
@@ -378,6 +403,7 @@
 		5BCF60562017B6EF0025B6ED /* cell */ = {
 			isa = PBXGroup;
 			children = (
+				5BAC222B202263E9009D8983 /* bottomsheet */,
 				5BCF60572017B7410025B6ED /* PictureDetailCell.swift */,
 				5BC75F6F2017CD8500A595AE /* PictureDetailReusableView.swift */,
 			);
@@ -530,14 +556,17 @@
 				5BFFAB8A2015F0070044C0D2 /* Filter.swift in Sources */,
 				5BAB92E7201A5B0E00EDC2C9 /* DummyReusableView.swift in Sources */,
 				5B102740201F848900E9BE4C /* UICollectionView.swift in Sources */,
+				5BAC222F20226458009D8983 /* DetailsBotomSheetCell.swift in Sources */,
 				5BC75F702017CD8500A595AE /* PictureDetailReusableView.swift in Sources */,
 				5BC591A0201E2244002EA20F /* PopularPicturesService.swift in Sources */,
 				5BAC7E142010920800F33F1A /* ServiceProvider.swift in Sources */,
 				5B88E77E2014CCC200502F97 /* BaseCollectionViewCell.swift in Sources */,
 				5B102742201F9B3C00E9BE4C /* LoadingStateWithPictures.swift in Sources */,
+				5BAC222D20226406009D8983 /* TitleBottomSheetCell.swift in Sources */,
 				5BAC7E322010C4BE00F33F1A /* ReactorProvider.swift in Sources */,
 				5B88E7832014FAD900502F97 /* Query.swift in Sources */,
 				5B76874D201E32B9006C54D3 /* CloudPictureMapper.swift in Sources */,
+				5B3B9DE02021071900FE629D /* DescriptionBotomSheetCell.swift in Sources */,
 				5B79B254201CF67500680951 /* PictureInfoSection.swift in Sources */,
 				5B76874F201E330C006C54D3 /* PopularPictureMapper.swift in Sources */,
 				5BAC7E2820109BE400F33F1A /* PictureListReactor.swift in Sources */,
@@ -545,12 +574,15 @@
 				5B88E76C2013354B00502F97 /* Equatable.swift in Sources */,
 				5B88E7712013621600502F97 /* RxTableViewSectionedReloadDataSource.swift in Sources */,
 				5BAC7E2D2010AA7300F33F1A /* BaseViewController.swift in Sources */,
+				5B3B9DE420210B7400FE629D /* BottomSheetSectionItem.swift in Sources */,
 				5BAC7E112010908E00F33F1A /* PictureListViewController.swift in Sources */,
 				5BAC7E392010F33D00F33F1A /* PictureCell.swift in Sources */,
 				5BFFAB862015D5A30044C0D2 /* FilterReactor.swift in Sources */,
 				5BAC7E172010924900F33F1A /* PictureCloudService.swift in Sources */,
 				5BC5919B201DD341002EA20F /* FocusedPictureService.swift in Sources */,
 				5BAC7E1A2010928700F33F1A /* BaseService.swift in Sources */,
+				5B3B9DE620210FDA00FE629D /* TableViewWithTransparentHeader.swift in Sources */,
+				5B3B9DE22021077300FE629D /* BaseTableViewCell.swift in Sources */,
 				5BAC7E2B20109C1100F33F1A /* BaseReactor.swift in Sources */,
 				5BC75F6E2017BDBE00A595AE /* PictureDetailSectionItem.swift in Sources */,
 				5B79B25B201D078900680951 /* FocusedItemEvaluator.swift in Sources */,
