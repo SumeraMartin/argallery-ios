@@ -53,6 +53,9 @@ class PictureDetailCell: BaseCollectionViewCell {
     func bind() {
         centerIfNeeded()
         
+        descriptionTableView.separatorStyle = .none
+        descriptionTableView.allowsSelection = false
+        
         blurVisualEffect.effect = UIBlurEffect(style: .light)
         blurVisualEffect.frame = bounds
         pictureView.addSubview(blurVisualEffect)
@@ -60,6 +63,8 @@ class PictureDetailCell: BaseCollectionViewCell {
         blurAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear) {
             self.blurVisualEffect.effect = nil
         }
+        blurAnimator?.pauseAnimation()
+        
         blurAnimator?.fractionComplete = 1
         blurAnimator?.addCompletion({ [unowned self] (_) in
             self.blurAnimator = nil

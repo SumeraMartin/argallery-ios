@@ -2,11 +2,11 @@ import UIKit
 
 class FocusedItemEvaluator {
     
-    func snapToFocusedItem(_ collectionView: UICollectionView) {
+    func snapToFocusedItem(_ collectionView: UICollectionView, withAnimation: Bool = true) {
         let sectionIndex = getFocusedItemSection(collectionView)
         if let section = sectionIndex {
             let index = IndexPath(row: 0, section: section)
-            collectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
+            collectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: withAnimation)
         }
     }
     

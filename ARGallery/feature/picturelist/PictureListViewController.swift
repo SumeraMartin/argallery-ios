@@ -55,8 +55,6 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         imageCollectionView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
         
         reactor = assembler.reactorProvider.createPictureListReactor()
-        
-        transformCellsByDistanceFromCenter()
     }
     
     func bind(reactor: PictureListReactor) {
@@ -64,13 +62,33 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         let errorObservable = reactor.state.getChange { $0.isError }
         let loadingObservable = reactor.state.getChange { $0.isLoading }
         let loadingMoreEnabledObservable = reactor.state.getChange { $0.isMoreLoadingEnabled }
-       
-        Observable.combineLatest(dataObservable, errorObservable, loadingObservable) { ($0, $1, $2) }
+        let dataErrorLoadingObservable =  Observable.combineLatest(dataObservable, errorObservable, loadingObservable) { ($0, $1, $2) }
+        
+        dataErrorLoadingObservable
             .map { dataErrorLoading in
                 let (data, isError, isLoading) = dataErrorLoading
                 return self.createPictureSectionModels(data: data, isError: isError, isLoading: isLoading)
             }
             .bind(to: imageCollectionView.rx.items(dataSource: self.pictureDataSource))
+            .disposed(by: self.disposeBag)
+        
+        imageCollectionView.rx.didEndDisplayingCell
+            .subscribe(onNext: { index in
+                self.transformCellsByDistanceFromCenter()
+            })
+            .disposed(by: self.disposeBag)
+        
+        imageCollectionView.rx.didEndDisplayingCell
+            .take(1)
+            .subscribe(onNext: { index in
+                self.snapToFocusedItem()
+            })
+            .disposed(by: self.disposeBag)
+        
+        dataErrorLoadingObservable
+            .subscribe(onNext: { index in
+                self.transformCellsByDistanceFromCenter()
+            })
             .disposed(by: self.disposeBag)
         
         dataObservable
@@ -253,9 +271,9 @@ extension PictureListViewController: UICollectionViewDelegateFlowLayout {
                 case .startEdgePadding:
                     return CGSize(width: 150, height: collectionView.frame.height)
                 case .endEdgePadding:
-                    return CGSize(width: 50, height: collectionView.frame.height)
+                    return CGSize(width: 150, height: collectionView.frame.height)
                 case .FooterItem(_, isError: _):
-                    return CGSize(width: 225, height: collectionView.frame.height)
+                    return CGSize(width: 300, height: collectionView.frame.height)
                 default:
                     return CGSize(width: 300, height: collectionView.frame.height)
             }
@@ -293,18 +311,22 @@ extension PictureListViewController: UIScrollViewDelegate {
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if scrollView == imageCollectionView {
-            focusedItemEvaluator.snapToFocusedItem(imageCollectionView)
+             snapToFocusedItem()
         }
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if scrollView == imageCollectionView  && !decelerate {
-            focusedItemEvaluator.snapToFocusedItem(imageCollectionView)
+            snapToFocusedItem()
         }
     }
     
     func transformCellsByDistanceFromCenter() {
         collectionViewTransformer.transformByDistanceFromCenter(in: imageCollectionView)
+    }
+    
+    func snapToFocusedItem(withAnimation: Bool = true) {
+        focusedItemEvaluator.snapToFocusedItem(imageCollectionView, withAnimation: withAnimation)
     }
 }
 
