@@ -10,19 +10,26 @@ struct Filter: CustomStringConvertible {
     
     var firstCategoryEnabled: Bool
     
+    var secondCategoryEnabled: Bool
+    
+    var thirdCategoryEnabled: Bool
+    
     static func createDefault() -> Filter {
         return Filter(
             minPrice: 100,
             maxPrice: 10_000,
             minYear: 1850,
             maxYear: 2018,
-            firstCategoryEnabled: true
+            firstCategoryEnabled: true,
+            secondCategoryEnabled: true,
+            thirdCategoryEnabled: true
         )
     }
     
     var description: String {
         return "Filter  minPrice:\(minPrice) and maxPrice\(maxPrice) " +
-        "minYear:\(minYear) maxYear:\(maxYear) firstCategoryEnabled:\(firstCategoryEnabled)"
+        "minYear:\(minYear) maxYear:\(maxYear) firstCategoryEnabled:\(firstCategoryEnabled) " +
+        " secondCategoryEnabled:\(secondCategoryEnabled) thirdCategoryEnabled:\(thirdCategoryEnabled) "
     }
 }
 
@@ -33,5 +40,7 @@ extension Filter: Equatable {
             && lhs.minYear == rhs.minYear
             && lhs.maxYear == rhs.maxYear
             && lhs.firstCategoryEnabled == rhs.firstCategoryEnabled
+            && lhs.secondCategoryEnabled == rhs.secondCategoryEnabled
+            && lhs.thirdCategoryEnabled == rhs.thirdCategoryEnabled
     }
 }

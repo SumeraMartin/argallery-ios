@@ -291,7 +291,7 @@
                                 </items>
                             </navigationBar>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="LCR-dX-bp5">
-                                <rect key="frame" x="0.33333333333334281" y="88" width="374.66666666666663" height="465"/>
+                                <rect key="frame" x="0.33333333333334281" y="88" width="374.66666666666663" height="395"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fV9-L2-5ZY" userLabel="Divider">
                                         <rect key="frame" x="0.0" y="0.0" width="374.66666666666669" height="1"/>
@@ -399,7 +399,7 @@
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0Eu-1L-EQJ" userLabel="Checkbox container">
                                                 <rect key="frame" x="0.0" y="0.0" width="80" height="70"/>
                                                 <subviews>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xlQ-6g-crZ" customClass="BEMCheckBox">
+                                                    <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xlQ-6g-crZ" customClass="BEMCheckBox">
                                                         <rect key="frame" x="24" y="19" width="32" height="32"/>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                         <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -443,7 +443,7 @@
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EoB-kw-c4D" userLabel="Checkbox container">
                                                 <rect key="frame" x="0.0" y="0.0" width="80" height="70"/>
                                                 <subviews>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ByG-U6-KfF" customClass="BEMCheckBox">
+                                                    <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ByG-U6-KfF" customClass="BEMCheckBox">
                                                         <rect key="frame" x="24" y="19" width="32" height="32"/>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                         <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -479,50 +479,6 @@
                                         </subviews>
                                         <constraints>
                                             <constraint firstItem="EoB-kw-c4D" firstAttribute="leading" secondItem="R1e-Bz-8Dw" secondAttribute="leading" id="hSJ-bl-oce"/>
-                                        </constraints>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="AJi-c6-bEb" userLabel="Fourth category stack">
-                                        <rect key="frame" x="0.0" y="395" width="374.66666666666669" height="70"/>
-                                        <subviews>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mj2-H3-2yR" userLabel="Checkbox container">
-                                                <rect key="frame" x="0.0" y="0.0" width="80" height="70"/>
-                                                <subviews>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0Ev-HB-6m4" customClass="BEMCheckBox">
-                                                        <rect key="frame" x="24" y="19" width="32" height="32"/>
-                                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                        <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="width" constant="32" id="3HR-gp-cs7"/>
-                                                            <constraint firstAttribute="height" constant="32" id="lqm-In-22u"/>
-                                                        </constraints>
-                                                        <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="color" keyPath="onTintColor">
-                                                                <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                            </userDefinedRuntimeAttribute>
-                                                            <userDefinedRuntimeAttribute type="color" keyPath="onCheckColor">
-                                                                <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                            </userDefinedRuntimeAttribute>
-                                                        </userDefinedRuntimeAttributes>
-                                                    </view>
-                                                </subviews>
-                                                <color key="backgroundColor" red="0.99518030879999997" green="0.178666085" blue="0.3391090631" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <constraints>
-                                                    <constraint firstItem="0Ev-HB-6m4" firstAttribute="leading" secondItem="mj2-H3-2yR" secondAttribute="leading" constant="24" id="FXS-qh-j25"/>
-                                                    <constraint firstAttribute="height" constant="70" id="oVE-rm-B9M"/>
-                                                    <constraint firstAttribute="width" constant="80" id="pOQ-LW-fwP"/>
-                                                    <constraint firstItem="0Ev-HB-6m4" firstAttribute="centerY" secondItem="mj2-H3-2yR" secondAttribute="centerY" id="ycN-mv-bop"/>
-                                                </constraints>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Category 1" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xlm-R1-oZJ">
-                                                <rect key="frame" x="80" y="0.0" width="294.66666666666669" height="70"/>
-                                                <color key="backgroundColor" red="0.99518030879999997" green="0.178666085" blue="0.3391090631" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                        <constraints>
-                                            <constraint firstItem="mj2-H3-2yR" firstAttribute="leading" secondItem="AJi-c6-bEb" secondAttribute="leading" id="qdU-s3-MXf"/>
                                         </constraints>
                                     </stackView>
                                 </subviews>
@@ -564,6 +520,10 @@
                         <outlet property="firstCategoryContainer" destination="vzc-q3-Gno" id="ldN-k2-9GM"/>
                         <outlet property="priceRange" destination="Q92-Fl-R63" id="Tgi-ge-Q5J"/>
                         <outlet property="resetButton" destination="Tx4-mJ-P9F" id="1Vh-mr-6t9"/>
+                        <outlet property="secondCategoryCheckbox" destination="xlQ-6g-crZ" id="bfZ-sE-x2X"/>
+                        <outlet property="secondCategoryContainer" destination="nTy-OZ-Kah" id="tip-q6-Kyf"/>
+                        <outlet property="thirdCategoryCheckbox" destination="ByG-U6-KfF" id="cLr-3H-pxm"/>
+                        <outlet property="thirdCategoryContainer" destination="R1e-Bz-8Dw" id="zdd-9E-xAW"/>
                         <outlet property="yearRange" destination="7ms-3Y-Ank" id="o5S-2Y-FxS"/>
                     </connections>
                 </viewController>

@@ -24,6 +24,14 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
     
     @IBOutlet weak var firstCategoryCheckbox: BEMCheckBox!
     
+    @IBOutlet weak var secondCategoryCheckbox: BEMCheckBox!
+    
+    @IBOutlet weak var secondCategoryContainer: UIStackView!
+    
+    @IBOutlet weak var thirdCategoryCheckbox: BEMCheckBox!
+    
+    @IBOutlet weak var thirdCategoryContainer: UIStackView!
+    
     @IBOutlet weak var closeButton: UIBarButtonItem!
     
     @IBOutlet weak var resetButton: UIBarButtonItem!
@@ -96,6 +104,23 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        secondCategoryContainer.rx.tapGesture()
+            .when(.recognized)
+            .map { _ in .secondCategoryChanged }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        thirdCategoryContainer.rx.tapGesture()
+            .when(.recognized)
+            .map { _ in .thirdCategoryChanged }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        self.rx.viewWillDisappear
+            .map { _ in .viewWillDissappear }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .take(1)
             .map { $0.defaultFilter }
@@ -125,6 +150,12 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
                 if self.firstCategoryCheckbox.on != filter.firstCategoryEnabled {
                     self.firstCategoryCheckbox.setOn(filter.firstCategoryEnabled, animated: true)
                 }
+                if self.secondCategoryCheckbox.on != filter.secondCategoryEnabled {
+                    self.secondCategoryCheckbox.setOn(filter.secondCategoryEnabled, animated: true)
+                }
+                if self.thirdCategoryCheckbox.on != filter.thirdCategoryEnabled {
+                    self.thirdCategoryCheckbox.setOn(filter.thirdCategoryEnabled, animated: true)
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -143,7 +174,6 @@ extension FilterViewController: TTRangeSliderDelegate {
     }
     
     func rangeSlider(_ sender: TTRangeSlider!, didChangeSelectedMinimumValue selectedMinimum: Float, andMaximumValue selectedMaximum: Float) {
-        
         if sender === priceRange {
             let price = PriceRange(minPrice: Int(selectedMinimum), maxPrice: Int(selectedMaximum))
             priceRangeSubject.on(.next(price))

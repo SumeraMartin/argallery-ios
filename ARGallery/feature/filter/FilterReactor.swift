@@ -35,11 +35,26 @@ class FilterReactor: BaseReactor {
                     filter.firstCategoryEnabled = !oldFilter.firstCategoryEnabled
                     return filter
                 }
+            case .secondCategoryChanged:
+                return changeFilter { oldFilter in
+                    var filter = oldFilter
+                    filter.secondCategoryEnabled = !oldFilter.secondCategoryEnabled
+                    return filter
+                }
+            case .thirdCategoryChanged:
+                return changeFilter { oldFilter in
+                    var filter = oldFilter
+                    filter.thirdCategoryEnabled = !oldFilter.thirdCategoryEnabled
+                    return filter
+                }
+            case .viewWillDissappear:
+                return self.state.take(1)
+                    .flatMapLatest { state in
+                        self.provider.filterService.setFilter(filter: state.currentFilter)
+                    }
+                    .map { _ in .ignore }
             case .reset:
                 return Observable.just(Filter.createDefault())
-                    .flatMap { newFilter in
-                        self.provider.filterService.setFilter(filter: newFilter)
-                    }
                     .map { .changeCurrentFilter(filter: $0) }
         }
     }
@@ -50,17 +65,15 @@ class FilterReactor: BaseReactor {
             case let .changeCurrentFilter(filter):
                 state.currentFilter = filter
                 break
+            case .ignore:
+                break
         }
         return state
     }
     
     private func changeFilter(_ changeFilterAction: @escaping (Filter) -> Filter) -> Observable<Mutation> {
-        return self.provider.filterService
-            .getCurrentFilterOnce()
-            .map { oldFilter in changeFilterAction(oldFilter) }
-            .flatMap { newFilter in
-                self.provider.filterService.setFilter(filter: newFilter)
-            }
+        return self.state.take(1)
+            .map { state in changeFilterAction(state.currentFilter) }
             .map { .changeCurrentFilter(filter: $0)  }
     }
 }
@@ -71,11 +84,15 @@ extension FilterReactor {
         case priceRangeChanged(minPrice: Int, maxPrice: Int)
         case yearRangeChanged(minYear: Int, maxYear: Int)
         case firstCategoryChanged
+        case secondCategoryChanged
+        case thirdCategoryChanged
+        case viewWillDissappear
         case reset
     }
     
     enum Mutation {
         case changeCurrentFilter(filter: Filter)
+        case ignore
     }
     
     struct State {
