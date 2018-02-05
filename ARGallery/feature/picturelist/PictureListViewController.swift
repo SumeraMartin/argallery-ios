@@ -62,6 +62,7 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         let errorObservable = reactor.state.getChange { $0.isError }
         let loadingObservable = reactor.state.getChange { $0.isLoading }
         let loadingMoreEnabledObservable = reactor.state.getChange { $0.isMoreLoadingEnabled }
+        let focusedPictureObservable = reactor.state.filter { $0.focusedPicture != nil }.getChange { $0.focusedPicture! }
         let dataErrorLoadingObservable =  Observable.combineLatest(dataObservable, errorObservable, loadingObservable) { ($0, $1, $2) }
         
         dataErrorLoadingObservable
@@ -107,7 +108,7 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
-        pictureFocusedSubject
+        Observable.merge(pictureFocusedSubject.asObservable(), focusedPictureObservable)
             .distinctUntilChanged()
             .withLatestFrom(reactor.state) { picture, state in
                 let index = state.data.index(of: picture)
@@ -156,18 +157,14 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                  destinationViewController.initialPicture = picture
             }
         }
+        
+        if let filterViewController = segue.destination as? FilterViewController {
+            filterViewController.modalTransitionStyle = .crossDissolve
+        }
     }
     
     func pictureSnapped(index: Int) {
-        reactor!.state
-            .asObservable()
-            .take(1)
-            .map { $0.data }
-            .subscribe(onNext: { (data) in
-//                print(data[index])
-                print(index)
-            })
-            .disposed(by: self.disposeBag)
+
     }
     
     private func createPictureSectionModels(data: [Picture], isError: Bool, isLoading: Bool) -> [PictureSectionType] {

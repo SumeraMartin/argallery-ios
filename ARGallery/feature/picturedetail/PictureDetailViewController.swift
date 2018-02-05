@@ -15,6 +15,7 @@ class PictureDetailViewController: BaseViewController, ReactorKit.View  {
     @IBOutlet weak var backButton: UIImageView!
     
     @IBOutlet weak var popularView: UIImageView!
+    
     var panGestureRecognizer = UIPanGestureRecognizer()
     
     var rxDataSource: RxCollectionViewSectionedAnimatedDataSource<Section>!
@@ -65,7 +66,6 @@ class PictureDetailViewController: BaseViewController, ReactorKit.View  {
                 let centerX = scrollView.contentOffset.x + (scrollView.frame.width / 2)
                 let centerY = scrollView.frame.height / 2
                 let centerPoint = CGPoint(x: centerX, y: centerY)
-                print(centerPoint)
                 let index = self.picturesCollectionView.indexPathForItem(at: centerPoint)
                 return index?.row ?? -1
             }
@@ -97,23 +97,9 @@ extension PictureDetailViewController {
             switch sectionItem {
                 case let .pictureDetail(picture):
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PictureDetailCell.identifier, for: indexPath) as! PictureDetailCell
-                    cell.pictureView.heroID = picture.id
-                    if let url = picture.url {
-                        cell.pictureView.af_setImage(withURL: url)
-                    }
                     
-                    cell.pictureView.bounds = cell.bounds
-                    cell.pictureScrollViewContainer.bounds = cell.bounds
-                    
-                    cell.descriptionTableView.delegate = cell
-                    cell.bind()
-                    
-                    cell.pictureView.contentMode = .scaleAspectFill
-                    cell.pictureScrollViewContainer.delegate = cell
-                    cell.pictureScrollViewContainer.maximumZoomScale = 3
-                    cell.pictureScrollViewContainer.contentMode = .center
-                    cell.pictureScrollViewContainer.showsHorizontalScrollIndicator = false
-                    cell.pictureScrollViewContainer.showsVerticalScrollIndicator = false
+                    cell.delegate = self
+                    cell.bind(picture)
                     
                     cell.popularView.rx.tapGesture()
                         .when(.recognized)
@@ -164,13 +150,13 @@ extension PictureDetailViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 0
     }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 0
     }
 }
 
 extension PictureDetailViewController: UIGestureRecognizerDelegate {
-
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if let cell = picturesCollectionView.visibleCells[0] as? PictureDetailCell,
             cell.pictureScrollViewContainer.zoomScale == 1 {
@@ -178,5 +164,23 @@ extension PictureDetailViewController: UIGestureRecognizerDelegate {
             return v.y > abs(v.x)
         }
         return false
+    }
+}
+
+extension PictureDetailViewController: PictureDetailCellDelegate {
+    func pictureIsZoomed() {
+        picturesCollectionView.isScrollEnabled = false
+    }
+    
+    func pictureIsUnzoomed() {
+        picturesCollectionView.isScrollEnabled = true
+    }
+    
+    func descriptionIsShown() {
+        panGestureRecognizer.isEnabled = false
+    }
+    
+    func descriptionIsHidden() {
+        panGestureRecognizer.isEnabled = true
     }
 }

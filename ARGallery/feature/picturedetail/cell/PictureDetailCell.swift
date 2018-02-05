@@ -18,6 +18,10 @@ class PictureDetailCell: BaseCollectionViewCell {
     
     @IBOutlet weak var popularView: UIImageView!
     
+    let descriptionTitleHeight = CGFloat(80)
+    
+    var delegate: PictureDetailCellDelegate?
+    
     var blurVisualEffect = UIVisualEffectView(effect: UIBlurEffect(style: .light))
     
     var descriptionDataSource: RxTableViewSectionedReloadDataSource<BottomSheetSection>!
@@ -27,6 +31,8 @@ class PictureDetailCell: BaseCollectionViewCell {
     var initialBottomSheetOffset: CGPoint?
     
     var blurAnimator: UIViewPropertyAnimator?
+    
+    var isDescriptionShown = false
     
     var image: UIImage? {
         get { return pictureView.image }
@@ -45,56 +51,52 @@ class PictureDetailCell: BaseCollectionViewCell {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
-        doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTap(gr:)))
+        let selector = #selector(doubleTap(gestureRecognizer:))
+        doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: selector)
         doubleTapGestureRecognizer.numberOfTapsRequired = 2
         addGestureRecognizer(doubleTapGestureRecognizer)
     }
     
-    func bind() {
-        centerIfNeeded()
+    func bind(_ picture: Picture) {
+        pictureView.heroID = picture.id
+        if let url = picture.url {
+            pictureView.af_setImage(withURL: url)
+            setNeedsLayout()
+        }
+        
+        pictureView.bounds = bounds
+        pictureScrollViewContainer.bounds = bounds
+        
+        descriptionTableView.delegate = self
+        
+        pictureView.contentMode = .scaleAspectFill
+        pictureScrollViewContainer.delegate = self
+        pictureScrollViewContainer.maximumZoomScale = 3
+        pictureScrollViewContainer.contentMode = .center
+        pictureScrollViewContainer.showsHorizontalScrollIndicator = false
+        pictureScrollViewContainer.showsVerticalScrollIndicator = false
         
         descriptionTableView.separatorStyle = .none
         descriptionTableView.allowsSelection = false
+        descriptionTableView.bounces = false
         
-        blurVisualEffect.effect = UIBlurEffect(style: .light)
-        blurVisualEffect.frame = bounds
+        blurVisualEffect.effect = UIBlurEffect(style: .dark)
+        blurVisualEffect.isHidden = true
         pictureView.addSubview(blurVisualEffect)
-        
-        blurAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear) {
-            self.blurVisualEffect.effect = nil
-        }
-        blurAnimator?.pauseAnimation()
-        
-        blurAnimator?.fractionComplete = 1
-        blurAnimator?.addCompletion({ [unowned self] (_) in
-            self.blurAnimator = nil
-        })
         
         descriptionTableView.rowHeight = 60;
         
-        descriptionDataSource = DescriptionDataSource(configureCell: { (dataSource, tableView, index, item) in
-            switch dataSource[index] {
-                case .title:
-                    let cell = tableView.dequeueReusableCell(withIdentifier: TitleBottomSheetCell.identifier, for: index) as! TitleBottomSheetCell
-                    cell.title.text = "dsa dsdsa das da dasdsa d"
-                    return cell
-                case .details:
-                    let cell = tableView.dequeueReusableCell(withIdentifier: DetailsBottomSheetCell.identifier, for: index) as! DetailsBottomSheetCell
-                    cell.year.text = "2015"
-                    return cell
-                case .description:
-                    let cell = tableView.dequeueReusableCell(withIdentifier: DescriptionBottomSheetCell.identifier, for: index) as! DescriptionBottomSheetCell
-                    cell.descriptionText.text = "Lorem ipsum dolor sit amet. Cras tincidunt lobortis feugiat vivamus at augue eget. Eu lobortis elementum nibh tellus molestie nunc non blandit massa. Et pharetra pharetra massa massa ultricies mi quis hendrerit. Varius sit amet mattis vulputate enim. Nisi lacus sed viverra tellus in hac habitasse platea. Facilisis sed odio morbi quis commodo odio. Condimentum mattis pellentesque id nibh. Cursus risus at ultrices mi tempus. Id interdum velit laoreet id donec ultrices tincidunt. Amet consectetur adipiscing elit ut aliquam purus sit amet. Netus et malesuada fames ac. Tincidunt praesent semper feugiat nibh sed pulvinar. Suspendisse potenti nullam ac tortor vitae purus. Ut sem nulla pharetra diam. Bibendum neque egestas congue quisque egestas diam in arcu."
-                    return cell
-            }
-
-        })
+        isDescriptionShown = false
         
-        Observable.just([
+        descriptionDataSource = createDescriptionDataSource(forPicture: picture)
+        
+        let descriptionModels = [
             BottomSheetSection(model: "title", items: [BottomSheetSectionItem.title]),
             BottomSheetSection(model: "details", items: [BottomSheetSectionItem.details]),
             BottomSheetSection(model: "description", items: [BottomSheetSectionItem.description]),
-            ])
+        ]
+    
+        Observable.just(descriptionModels)
             .bind(to: descriptionTableView.rx.items(dataSource: descriptionDataSource))
             .disposed(by: self.disposeBagCell)
     }
@@ -121,24 +123,27 @@ class PictureDetailCell: BaseCollectionViewCell {
         return zoomRect
     }
     
-    @objc func doubleTap(gr: UITapGestureRecognizer) {
+    @objc func doubleTap(gestureRecognizer: UITapGestureRecognizer) {
         if pictureScrollViewContainer.zoomScale == 1 {
-            print(pictureScrollViewContainer.maximumZoomScale)
-            pictureScrollViewContainer.zoom(to: zoomRectForScale(scale: pictureScrollViewContainer.maximumZoomScale, center: gr.location(in: gr.view)), animated: true)
+            setZoomedState(gestureRecognizer)
         } else {
-            pictureScrollViewContainer.setZoomScale(1, animated: true)
+            setNormalZoomState(gestureRecognizer)
         }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        descriptionTableView.contentInset = UIEdgeInsets(top: self.bounds.size.height - descriptionTableView.rowHeight, left: 0, bottom: 0, right: 0)
+        descriptionTableView.contentInset = UIEdgeInsets(top: self.bounds.size.height - descriptionTitleHeight, left: 0, bottom: 0, right: 0)
         descriptionTableView.contentOffset = CGPoint(x: 0, y: -descriptionTableView.contentInset.top)
         
         initialBottomSheetOffset = CGPoint(x: 0, y: -descriptionTableView.contentInset.top)
         
         pictureScrollViewContainer.frame = bounds
+        
+        blurVisualEffect.frame = CGRect(origin: .zero, size: CGSize(width: bounds.width, height: bounds.width))
+        blurVisualEffect.bounds = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
+        
         let size: CGSize
         if let image = pictureView.image {
             let containerSize = CGSize(width: bounds.width, height: bounds.height - topInset)
@@ -152,6 +157,8 @@ class PictureDetailCell: BaseCollectionViewCell {
         }
         pictureView.frame = CGRect(origin: .zero, size: size)
         pictureScrollViewContainer.contentSize = size
+        
+        layoutIfNeeded()
         centerIfNeeded()
     }
     
@@ -160,8 +167,13 @@ class PictureDetailCell: BaseCollectionViewCell {
         
         pictureScrollViewContainer.setZoomScale(1, animated: false)
         blurAnimator?.stopAnimation(true)
+        blurAnimator = nil
         blurVisualEffect.removeFromSuperview()
         initialBottomSheetOffset = nil
+        descriptionTableView.isHidden = false
+        descriptionTableView.alpha = 1
+        popularView.isHidden = false
+        popularView.alpha = 1
     }
     
     func centerIfNeeded() {
@@ -178,6 +190,95 @@ class PictureDetailCell: BaseCollectionViewCell {
         }
         pictureScrollViewContainer.contentInset = inset
     }
+    
+    func setDescriptionScrollProgress(value: CGFloat) {
+        if blurAnimator == nil && value < 1 {
+            blurAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear) {
+                self.blurVisualEffect.effect = nil
+            }
+            blurAnimator?.fractionComplete = 1
+            blurAnimator?.addCompletion({ [unowned self] (_) in
+                self.blurAnimator = nil
+            })
+        }
+        
+        blurAnimator?.fractionComplete = value
+    }
+    
+    func setDescriptionShownState() {
+        delegate?.descriptionIsShown()
+        
+        blurVisualEffect.isHidden = false
+        
+        hideViewWithAnimation(popularView)
+    }
+    
+    func setDescriptionHiddenState() {
+        delegate?.descriptionIsHidden()
+        
+        blurVisualEffect.isHidden = true
+        
+        showViewWithAnimation(popularView)
+    }
+    
+    private func setNormalZoomState(_ gestureRecognizer: UITapGestureRecognizer) {
+        delegate?.pictureIsUnzoomed()
+        
+        pictureScrollViewContainer.setZoomScale(1, animated: true)
+        
+        showViewWithAnimation(descriptionTableView)
+        showViewWithAnimation(popularView)
+    }
+    
+    private func setZoomedState(_ gestureRecognizer: UITapGestureRecognizer) {
+         delegate?.pictureIsZoomed()
+        
+        let maxZoomScale = pictureScrollViewContainer.maximumZoomScale
+        let center = gestureRecognizer.location(in: gestureRecognizer.view)
+        let zoom = zoomRectForScale(scale: maxZoomScale, center: center)
+        pictureScrollViewContainer.zoom(to: zoom, animated: true)
+        
+        hideViewWithAnimation(descriptionTableView)
+        hideViewWithAnimation(popularView)
+    }
+    
+    private func showViewWithAnimation(_ view: UIView) {
+        view.isHidden = false
+        view.layer.removeAllAnimations()
+        UIView.animate(withDuration: 0.5, delay: 0, options: [], animations: {
+            view.alpha = 1
+        })
+    }
+    
+    private func hideViewWithAnimation(_ view: UIView) {
+        view.layer.removeAllAnimations()
+        UIView.animate(withDuration: 0.5, delay: 0, options: [], animations: {
+            view.alpha = 0
+        }, completion: { _ in
+            view.isHidden = true
+        })
+    }
+}
+
+extension PictureDetailCell {
+    func createDescriptionDataSource(forPicture picture: Picture) -> DescriptionDataSource {
+        return DescriptionDataSource(configureCell: { (dataSource, tableView, index, item) in
+            switch dataSource[index] {
+            case .title:
+                let cell = tableView.dequeueReusableCell(withIdentifier: TitleBottomSheetCell.identifier, for: index) as! TitleBottomSheetCell
+                cell.bind(picture)
+                return cell
+            case .details:
+                let cell = tableView.dequeueReusableCell(withIdentifier: DetailsBottomSheetCell.identifier, for: index) as! DetailsBottomSheetCell
+                cell.bind(picture)
+                return cell
+            case .description:
+                let cell = tableView.dequeueReusableCell(withIdentifier: DescriptionBottomSheetCell.identifier, for: index) as! DescriptionBottomSheetCell
+                cell.bind(picture)
+                return cell
+            }
+        })
+    }
 }
 
 extension PictureDetailCell: UIScrollViewDelegate, UITableViewDelegate {
@@ -187,17 +288,31 @@ extension PictureDetailCell: UIScrollViewDelegate, UITableViewDelegate {
         }
         
         if scrollView == descriptionTableView {
-
             if let offset = initialBottomSheetOffset {
                 let value = CGFloat((scrollView.contentOffset.y / (offset.y / 100)) / 100)
-                blurAnimator?.fractionComplete = value
+                
+                if value <= 1 {
+                    setDescriptionScrollProgress(value: value)
+                }
+                
+                if value >= 0.95 {
+                    if isDescriptionShown == true {
+                        isDescriptionShown = false
+                        setDescriptionHiddenState()
+                    }
+                }
+                
+                if value < 0.95 {
+                    if isDescriptionShown == false {
+                        isDescriptionShown = true
+                        setDescriptionShownState()
+                    }
+                }
             }
-           
             return
         }
         
         fatalError("Unknown scroll view")
-        
     }
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
@@ -215,10 +330,23 @@ extension PictureDetailCell: UIScrollViewDelegate, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 0 || indexPath.section == 1 {
-            return 100 // the height you want
+        if indexPath.section == 0 {
+            return descriptionTitleHeight
+        } else if indexPath.section == 1 {
+            return UITableViewAutomaticDimension
         } else {
             return UITableViewAutomaticDimension
         }
     }
+}
+
+protocol PictureDetailCellDelegate {
+    
+    func descriptionIsShown()
+    
+    func descriptionIsHidden()
+    
+    func pictureIsZoomed()
+    
+    func pictureIsUnzoomed()
 }
