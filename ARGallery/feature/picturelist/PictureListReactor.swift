@@ -12,6 +12,7 @@ class PictureListReactor: BaseReactor {
             isMoreLoadingEnabled: true,
             isLoading: false,
             isError: false,
+            dataSource: .all,
             data: [],
             focusedPicture: nil
         )
@@ -20,13 +21,15 @@ class PictureListReactor: BaseReactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
             case .initialize:
-                let picturesObservable = self.provider.pictureCloudService
-                    .getLoadingStateWithDataObservable()
-                    .map { loadingStateWithData in loadingStateWithData.data }
-                    .map { data in Mutation.showData(data)}
-            
-                let loadingStateObservable = self.provider.pictureCloudService
-                    .getLoadingStateWithDataObservable()
+                let startLoadingObservable = self.provider.currentDataSourceService
+                    .getCurrentDataSourceSingle()
+                    .asObservable()
+                    .do(onNext: { dataSource in dataSource.reload()})
+                    .map { _ in Mutation.ignore }
+                
+                let loadingStateObservable = self.provider.currentDataSourceService
+                    .getCurrentDataSourceObservable()
+                    .flatMapLatest { dataSource in dataSource.getLoadingStateWithDataObservable() }
                     .map { loadingStateWithData in loadingStateWithData.loadingState }
                     .map { loadingState -> PictureListReactor.Mutation in
                         switch loadingState {
@@ -40,40 +43,69 @@ class PictureListReactor: BaseReactor {
                                 return Mutation.showCompleted
                         }
                     }
+            
+                let picturesObservable = self.provider.currentDataSourceService
+                    .getCurrentDataSourceObservable()
+                    .flatMapLatest { dataSource in dataSource.getLoadingStateWithDataObservable() }
+                    .map { loadingStateWithData in loadingStateWithData.data }
+                    .map { data in Mutation.showData(data)}
                 
-                let startLoadingObservable = self.provider.pictureCloudService
-                    .reload()
-                    .map { _ in Mutation.ignore }
-                    .asObservable()
+                let dataSourceObservable = self.provider.currentDataSourceService
+                    .getCurrentDataSourceObservable()
+                    .flatMapLatest { dataSource in dataSource.getLoadingStateWithDataObservable() }
+                    .map { loadingStateWithData in loadingStateWithData.dataSource }
+                    .map { dataSourceType in Mutation.setDataSource(dataSourceType) }
                 
-                let focusedPictureObservable = self.provider.focusedPictureService
+                let observeFocusedItemObservable = self.provider.focusedPictureService
                     .getFocusedPictureObservable()
                     .filter { $0 != nil }
                     .map { Mutation.setFocusedPicture($0!) }
-                
-                return Observable.merge([
-                    picturesObservable,
-                    loadingStateObservable,
-                    startLoadingObservable,
-                    focusedPictureObservable
-                ])
+            
+                return Observable.merge(
+                        startLoadingObservable,
+                        loadingStateObservable,
+                        picturesObservable,
+                        observeFocusedItemObservable,
+                        dataSourceObservable
+                    )
             case .loadMore:
-                return self.provider.pictureCloudService
-                    .getLoadingStateWithDataSingle()
-                    .flatMap { loadingStateWithData in
-                        if loadingStateWithData.loadingState != .loading {
-                            return self.provider.pictureCloudService
-                                .loadMore()
-                                .map { Mutation.ignore }
+                return self.provider.currentDataSourceService
+                    .getCurrentDataSourceSingle()
+                    .flatMap { dataSource in dataSource.getLoadingStateWithDataSingle() }
+                    .asObservable()
+                    .map { loadingStateWithPictures in loadingStateWithPictures.loadingState }
+                    .flatMapLatest { loadingState -> Observable<Mutation> in
+                        if loadingState != .loading {
+                            return self.provider.currentDataSourceService
+                                .getCurrentDataSourceSingle()
+                                .asObservable()
+                                .do(onNext: { dataSource in dataSource.loadMore() })
+                                .map { _ in Mutation.ignore }
                         }
-                        return Single.just(Mutation.ignore)
+                        return Observable.just(Mutation.ignore)
                     }
                     .asObservable()
             case .refresh:
-                return self.provider.pictureCloudService
-                    .reload()
-                    .map { Mutation.ignore }
+                return self.provider.currentDataSourceService
+                    .getCurrentDataSourceSingle()
                     .asObservable()
+                    .do(onNext: { dataSource in dataSource.reload() })
+                    .map { _ in Mutation.ignore }
+            case .allDataSelected:
+                return self.provider.currentDataSourceService
+                    .changeCurrentDataSource(.all)
+                    .asObservable()
+                    .map { _ in Mutation.ignore }
+            case .filteredDataSelected:
+                return self.provider.currentDataSourceService
+                    .changeCurrentDataSource(.filtered)
+                    .asObservable()
+                    .map { _ in Mutation.ignore }
+            case .favouriteDataSelected:
+                return self.provider.currentDataSourceService
+                    .changeCurrentDataSource(.favourites)
+                    .asObservable()
+                    .map { _ in Mutation.ignore }
         }
     }
 
@@ -92,8 +124,11 @@ class PictureListReactor: BaseReactor {
                 state.isError = false
                 break
             case .hideErrorAndLoading:
+                state.isMoreLoadingEnabled = true
                 state.isLoading = false
                 state.isError = false
+            case let .setDataSource(dataSourceType):
+                state.dataSource = dataSourceType
                 break
             case let .setFocusedPicture(picture):
                 state.focusedPicture = picture
@@ -116,6 +151,9 @@ extension PictureListReactor {
         case initialize
         case refresh
         case loadMore
+        case allDataSelected
+        case favouriteDataSelected
+        case filteredDataSelected
     }
     
     enum Mutation {
@@ -123,8 +161,9 @@ extension PictureListReactor {
         case showData([Picture])
         case showLoading
         case showError
-        case hideErrorAndLoading
         case showCompleted
+        case hideErrorAndLoading
+        case setDataSource(DataSourceType)
         case setFocusedPicture(Picture)
     }
     
@@ -132,8 +171,13 @@ extension PictureListReactor {
         var isMoreLoadingEnabled: Bool
         var isLoading: Bool
         var isError: Bool
+        var dataSource: DataSourceType
         var data: [Picture]
         var focusedPicture: Picture?
+        
+        func isEmptyState() -> Bool {
+            return data.count == 0 && isError == false && isLoading == false
+        }
     }
 }
 

@@ -10,6 +10,7 @@
 		076605CDC1E21D07564BD512 /* Pods_ARGallery.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EAE26ECF359D5106D2D79BA /* Pods_ARGallery.framework */; };
 		5B102740201F848900E9BE4C /* UICollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B10273F201F848900E9BE4C /* UICollectionView.swift */; };
 		5B102742201F9B3C00E9BE4C /* LoadingStateWithPictures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B102741201F9B3C00E9BE4C /* LoadingStateWithPictures.swift */; };
+		5B2FBBAA2028F7E100DD3210 /* CurrentDataSourceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2FBBA92028F7E100DD3210 /* CurrentDataSourceService.swift */; };
 		5B3B9DE02021071900FE629D /* DescriptionBotomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DDF2021071900FE629D /* DescriptionBotomSheetCell.swift */; };
 		5B3B9DE22021077300FE629D /* BaseTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DE12021077300FE629D /* BaseTableViewCell.swift */; };
 		5B3B9DE420210B7400FE629D /* BottomSheetSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9DE320210B7400FE629D /* BottomSheetSectionItem.swift */; };
@@ -34,12 +35,14 @@
 		5B88E77E2014CCC200502F97 /* BaseCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E77D2014CCC200502F97 /* BaseCollectionViewCell.swift */; };
 		5B88E7802014CF3E00502F97 /* PictureDetailReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E77F2014CF3E00502F97 /* PictureDetailReactor.swift */; };
 		5B88E7832014FAD900502F97 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E7822014FAD900502F97 /* Query.swift */; };
+		5B957D5E202EF65700B8B61F /* TransitionAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */; };
+		5B957D60202EF68900B8B61F /* TransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */; };
 		5BAB92E7201A5B0E00EDC2C9 /* DummyReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAB92E6201A5B0E00EDC2C9 /* DummyReusableView.swift */; };
 		5BAC222D20226406009D8983 /* TitleBottomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */; };
 		5BAC222F20226458009D8983 /* DetailsBotomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */; };
 		5BAC7E112010908E00F33F1A /* PictureListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E102010908E00F33F1A /* PictureListViewController.swift */; };
 		5BAC7E142010920800F33F1A /* ServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E132010920800F33F1A /* ServiceProvider.swift */; };
-		5BAC7E172010924900F33F1A /* PictureCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E162010924900F33F1A /* PictureCloudService.swift */; };
+		5BAC7E172010924900F33F1A /* AllPicturesCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E162010924900F33F1A /* AllPicturesCloudService.swift */; };
 		5BAC7E1A2010928700F33F1A /* BaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E192010928700F33F1A /* BaseService.swift */; };
 		5BAC7E1D2010953600F33F1A /* KenticoClientService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E1C2010953600F33F1A /* KenticoClientService.swift */; };
 		5BAC7E26201099D600F33F1A /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC7E25201099D600F33F1A /* Result.swift */; };
@@ -59,6 +62,10 @@
 		5BC75F6E2017BDBE00A595AE /* PictureDetailSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC75F6D2017BDBE00A595AE /* PictureDetailSectionItem.swift */; };
 		5BC75F702017CD8500A595AE /* PictureDetailReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC75F6F2017CD8500A595AE /* PictureDetailReusableView.swift */; };
 		5BCF60582017B7410025B6ED /* PictureDetailCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BCF60572017B7410025B6ED /* PictureDetailCell.swift */; };
+		5BEE795F202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE795E202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift */; };
+		5BEE7963202CD98500CC7F05 /* FilteredPicturesCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE7962202CD98500CC7F05 /* FilteredPicturesCloudService.swift */; };
+		5BEE7967202CDDE100CC7F05 /* Completable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE7966202CDDE100CC7F05 /* Completable.swift */; };
+		5BEE7969202CE5B200CC7F05 /* Single.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE7968202CE5B200CC7F05 /* Single.swift */; };
 		5BFFAB842015D5950044C0D2 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFFAB832015D5950044C0D2 /* FilterViewController.swift */; };
 		5BFFAB862015D5A30044C0D2 /* FilterReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFFAB852015D5A30044C0D2 /* FilterReactor.swift */; };
 		5BFFAB882015EFB20044C0D2 /* FilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFFAB872015EFB20044C0D2 /* FilterService.swift */; };
@@ -70,6 +77,7 @@
 		331EB1113A8BD5570B5BF501 /* Pods-ARGallery.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARGallery.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARGallery/Pods-ARGallery.debug.xcconfig"; sourceTree = "<group>"; };
 		5B10273F201F848900E9BE4C /* UICollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICollectionView.swift; sourceTree = "<group>"; };
 		5B102741201F9B3C00E9BE4C /* LoadingStateWithPictures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingStateWithPictures.swift; sourceTree = "<group>"; };
+		5B2FBBA92028F7E100DD3210 /* CurrentDataSourceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentDataSourceService.swift; sourceTree = "<group>"; };
 		5B3B9DDF2021071900FE629D /* DescriptionBotomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescriptionBotomSheetCell.swift; sourceTree = "<group>"; };
 		5B3B9DE12021077300FE629D /* BaseTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableViewCell.swift; sourceTree = "<group>"; };
 		5B3B9DE320210B7400FE629D /* BottomSheetSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetSectionItem.swift; sourceTree = "<group>"; };
@@ -95,12 +103,14 @@
 		5B88E77D2014CCC200502F97 /* BaseCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionViewCell.swift; sourceTree = "<group>"; };
 		5B88E77F2014CF3E00502F97 /* PictureDetailReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDetailReactor.swift; sourceTree = "<group>"; };
 		5B88E7822014FAD900502F97 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
+		5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimations.swift; sourceTree = "<group>"; };
+		5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimator.swift; sourceTree = "<group>"; };
 		5BAB92E6201A5B0E00EDC2C9 /* DummyReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyReusableView.swift; sourceTree = "<group>"; };
 		5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBottomSheetCell.swift; sourceTree = "<group>"; };
 		5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsBotomSheetCell.swift; sourceTree = "<group>"; };
 		5BAC7E102010908E00F33F1A /* PictureListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureListViewController.swift; sourceTree = "<group>"; };
 		5BAC7E132010920800F33F1A /* ServiceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProvider.swift; sourceTree = "<group>"; };
-		5BAC7E162010924900F33F1A /* PictureCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureCloudService.swift; sourceTree = "<group>"; };
+		5BAC7E162010924900F33F1A /* AllPicturesCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllPicturesCloudService.swift; sourceTree = "<group>"; };
 		5BAC7E192010928700F33F1A /* BaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseService.swift; sourceTree = "<group>"; };
 		5BAC7E1C2010953600F33F1A /* KenticoClientService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KenticoClientService.swift; sourceTree = "<group>"; };
 		5BAC7E25201099D600F33F1A /* Result.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
@@ -122,6 +132,10 @@
 		5BC75F6D2017BDBE00A595AE /* PictureDetailSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDetailSectionItem.swift; sourceTree = "<group>"; };
 		5BC75F6F2017CD8500A595AE /* PictureDetailReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDetailReusableView.swift; sourceTree = "<group>"; };
 		5BCF60572017B7410025B6ED /* PictureDetailCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDetailCell.swift; sourceTree = "<group>"; };
+		5BEE795E202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDataSourceServiceType.swift; sourceTree = "<group>"; };
+		5BEE7962202CD98500CC7F05 /* FilteredPicturesCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredPicturesCloudService.swift; sourceTree = "<group>"; };
+		5BEE7966202CDDE100CC7F05 /* Completable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Completable.swift; sourceTree = "<group>"; };
+		5BEE7968202CE5B200CC7F05 /* Single.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Single.swift; sourceTree = "<group>"; };
 		5BFFAB832015D5950044C0D2 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		5BFFAB852015D5A30044C0D2 /* FilterReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterReactor.swift; sourceTree = "<group>"; };
 		5BFFAB872015EFB20044C0D2 /* FilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterService.swift; sourceTree = "<group>"; };
@@ -193,6 +207,7 @@
 		5B79B255201CFF9400680951 /* view */ = {
 			isa = PBXGroup;
 			children = (
+				5B957D5C202EF63800B8B61F /* animation */,
 				5B79B256201CFFCF00680951 /* ScrollSpeedEvaluator.swift */,
 				5B79B25A201D078900680951 /* FocusedItemEvaluator.swift */,
 				5B79B258201D02D600680951 /* CollectionCellsTransformer.swift */,
@@ -227,6 +242,15 @@
 				5B88E7822014FAD900502F97 /* Query.swift */,
 			);
 			path = kentico;
+			sourceTree = "<group>";
+		};
+		5B957D5C202EF63800B8B61F /* animation */ = {
+			isa = PBXGroup;
+			children = (
+				5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */,
+				5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */,
+			);
+			path = animation;
 			sourceTree = "<group>";
 		};
 		5BAC222B202263E9009D8983 /* bottomsheet */ = {
@@ -270,6 +294,8 @@
 				5BC5919C201E0945002EA20F /* persistence */,
 				5BFFAB872015EFB20044C0D2 /* FilterService.swift */,
 				5BC5919A201DD341002EA20F /* FocusedPictureService.swift */,
+				5B2FBBA92028F7E100DD3210 /* CurrentDataSourceService.swift */,
+				5BEE795E202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift */,
 			);
 			path = service;
 			sourceTree = "<group>";
@@ -286,7 +312,8 @@
 			isa = PBXGroup;
 			children = (
 				5BAC7E1C2010953600F33F1A /* KenticoClientService.swift */,
-				5BAC7E162010924900F33F1A /* PictureCloudService.swift */,
+				5BAC7E162010924900F33F1A /* AllPicturesCloudService.swift */,
+				5BEE7962202CD98500CC7F05 /* FilteredPicturesCloudService.swift */,
 			);
 			path = cloud;
 			sourceTree = "<group>";
@@ -332,6 +359,8 @@
 				5B88E76B2013354B00502F97 /* Equatable.swift */,
 				5B88E7702013621600502F97 /* RxTableViewSectionedReloadDataSource.swift */,
 				5B88E77420137F8200502F97 /* ObservableType.swift */,
+				5BEE7966202CDDE100CC7F05 /* Completable.swift */,
+				5BEE7968202CE5B200CC7F05 /* Single.swift */,
 			);
 			path = extensions;
 			sourceTree = "<group>";
@@ -560,6 +589,7 @@
 				5BC75F702017CD8500A595AE /* PictureDetailReusableView.swift in Sources */,
 				5BC591A0201E2244002EA20F /* PopularPicturesService.swift in Sources */,
 				5BAC7E142010920800F33F1A /* ServiceProvider.swift in Sources */,
+				5BEE7969202CE5B200CC7F05 /* Single.swift in Sources */,
 				5B88E77E2014CCC200502F97 /* BaseCollectionViewCell.swift in Sources */,
 				5B102742201F9B3C00E9BE4C /* LoadingStateWithPictures.swift in Sources */,
 				5BAC222D20226406009D8983 /* TitleBottomSheetCell.swift in Sources */,
@@ -567,9 +597,11 @@
 				5B88E7832014FAD900502F97 /* Query.swift in Sources */,
 				5B76874D201E32B9006C54D3 /* CloudPictureMapper.swift in Sources */,
 				5B3B9DE02021071900FE629D /* DescriptionBotomSheetCell.swift in Sources */,
+				5B957D60202EF68900B8B61F /* TransitionAnimator.swift in Sources */,
 				5B79B254201CF67500680951 /* PictureInfoSection.swift in Sources */,
 				5B76874F201E330C006C54D3 /* PopularPictureMapper.swift in Sources */,
 				5BAC7E2820109BE400F33F1A /* PictureListReactor.swift in Sources */,
+				5BEE795F202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift in Sources */,
 				5BAC7E1D2010953600F33F1A /* KenticoClientService.swift in Sources */,
 				5B88E76C2013354B00502F97 /* Equatable.swift in Sources */,
 				5B88E7712013621600502F97 /* RxTableViewSectionedReloadDataSource.swift in Sources */,
@@ -578,7 +610,7 @@
 				5BAC7E112010908E00F33F1A /* PictureListViewController.swift in Sources */,
 				5BAC7E392010F33D00F33F1A /* PictureCell.swift in Sources */,
 				5BFFAB862015D5A30044C0D2 /* FilterReactor.swift in Sources */,
-				5BAC7E172010924900F33F1A /* PictureCloudService.swift in Sources */,
+				5BAC7E172010924900F33F1A /* AllPicturesCloudService.swift in Sources */,
 				5BC5919B201DD341002EA20F /* FocusedPictureService.swift in Sources */,
 				5BAC7E1A2010928700F33F1A /* BaseService.swift in Sources */,
 				5B3B9DE620210FDA00FE629D /* TableViewWithTransparentHeader.swift in Sources */,
@@ -587,6 +619,7 @@
 				5BC75F6E2017BDBE00A595AE /* PictureDetailSectionItem.swift in Sources */,
 				5B79B25B201D078900680951 /* FocusedItemEvaluator.swift in Sources */,
 				5BFFAB882015EFB20044C0D2 /* FilterService.swift in Sources */,
+				5B2FBBAA2028F7E100DD3210 /* CurrentDataSourceService.swift in Sources */,
 				5B88E77520137F8200502F97 /* ObservableType.swift in Sources */,
 				5B88E7732013777300502F97 /* PictureSection.swift in Sources */,
 				5BC5919E201E0976002EA20F /* RealmProviderService.swift in Sources */,
@@ -598,8 +631,11 @@
 				5B88E7792013A56700502F97 /* LoadingMoreCell.swift in Sources */,
 				5B76874B201E31CE006C54D3 /* Picture.swift in Sources */,
 				5B79B257201CFFCF00680951 /* ScrollSpeedEvaluator.swift in Sources */,
+				5BEE7967202CDDE100CC7F05 /* Completable.swift in Sources */,
 				5B768748201E29C2006C54D3 /* PopularPicture.swift in Sources */,
 				5BBF0846200FEA73009E1FBA /* AppDelegate.swift in Sources */,
+				5BEE7963202CD98500CC7F05 /* FilteredPicturesCloudService.swift in Sources */,
+				5B957D5E202EF65700B8B61F /* TransitionAnimations.swift in Sources */,
 				5BAC7E352010CDA700F33F1A /* UIViewController.swift in Sources */,
 				5BFFAB8C2016451E0044C0D2 /* LoadingState.swift in Sources */,
 				5BCF60582017B7410025B6ED /* PictureDetailCell.swift in Sources */,
@@ -741,6 +777,7 @@
 			baseConfigurationReference = 331EB1113A8BD5570B5BF501 /* Pods-ARGallery.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = ARGallery/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -756,6 +793,7 @@
 			baseConfigurationReference = C57D63501895B2245D7BD9C4 /* Pods-ARGallery.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = ARGallery/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -12,6 +12,8 @@ class PictureCell : BaseCollectionViewCell, TransformableCell, SnappableCell {
         transform = transform.scaledBy(x: scale, y: scale)
         picture.transform = transform
  
+        picture.alpha = CGFloat(1.4 - resizePercentage * 4)
+        
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = Float(1 - resizePercentage * 4)
         layer.shadowOffset = CGSize.zero

@@ -30,7 +30,7 @@ class FilterService: BaseService, FilterServiceType {
     }
     
     func getFilterChanges() -> Observable<Filter> {
-        return filterSubject
+        return filterSubject.asObservable().distinctUntilChanged()
     }
     
     func setFilter(filter: Filter) -> Observable<Filter> {

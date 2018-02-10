@@ -41,13 +41,6 @@ class PictureDetailViewController: BaseViewController, ReactorKit.View  {
     }
     
     func bind(reactor: PictureDetailReactor) {
-        reactor.state
-            .getChange { $0.pictures }
-            .map { $0.map { PictureDetailSectionItem.pictureDetail(picture: $0) } }
-            .map { [Section(model: "First section", items: $0)] }
-            .bind(to: self.picturesCollectionView.rx.items(dataSource: self.rxDataSource))
-            .disposed(by: disposeBag)
-        
         let initialIndexObservable = reactor.state
             .getChange { state -> Int in state.initialPictureIndex }
         
@@ -57,6 +50,21 @@ class PictureDetailViewController: BaseViewController, ReactorKit.View  {
             .subscribe(onNext: { (index) in
                 let indexPath = IndexPath(row: index, section: 0)
                 self.picturesCollectionView.scrollToItem(at: indexPath, at: .right, animated: false)
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .getChange { $0.pictures }
+            .map { $0.map { PictureDetailSectionItem.pictureDetail(picture: $0) } }
+            .map { [Section(model: "First section", items: $0)] }
+            .bind(to: self.picturesCollectionView.rx.items(dataSource: self.rxDataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .getChange { $0.pictures }
+            .filter { pictures in pictures.count == 0 }
+            .subscribe(onNext: { _ in
+                self.dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
     

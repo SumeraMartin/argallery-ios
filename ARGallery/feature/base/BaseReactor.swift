@@ -16,6 +16,6 @@ extension BaseReactor {
     }
     
     func transform(state: Observable<State>) -> Observable<State> {
-        return state.debug("state")
+        return state
     }
 }

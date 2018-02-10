@@ -28,5 +28,9 @@ extension ObservableType where E: Any {
     func getChange<R>(_ transform: @escaping (Self.E) throws -> R)  -> RxSwift.Observable<R> where R:Sequence, R.Iterator.Element: Equatable {
         return self.map(transform).distinctUntilChanged()
     }
+    
+    func observeChange<R: Equatable>(_ transform: @escaping (Self.E) throws -> R)  -> RxSwift.Observable<Self.E> {
+        return Observable.zip(self.map(transform).distinctUntilChanged(), self) { _, data in data }
+    }
 }
 

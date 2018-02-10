@@ -9,10 +9,11 @@ class PictureDetailReactor: BaseReactor {
     init(provider: ServiceProviderType, initialPicture: Picture) {
         self.provider = provider
         
-        if let index = self.provider.pictureCloudService.getPictures().index(of: initialPicture) {
+        let pictures = self.provider.currentDataSourceService.getCurrentDataSource().getPictures()
+        if let index = pictures.index(of: initialPicture) {
             self.initialState = State(
                 initialPictureIndex: index,
-                pictures: self.provider.pictureCloudService.getPictures(),
+                pictures: pictures,
                 popularPictures: []
             )
         } else {
@@ -23,18 +24,27 @@ class PictureDetailReactor: BaseReactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
             case .initialize:
-                return self.provider.popularPicturesService
-                    .getPopularPictures()
+                let dataObservable = self.provider.currentDataSourceService
+                    .getCurrentDataSourceObservable()
+                    .flatMapLatest { $0.getLoadingStateWithDataObservable() }
+                    .map { loadingStateWithPictures in loadingStateWithPictures.data}
+                    .map { data in Mutation.picturesChanged(data) }
+                
+                let popularObservable = self.provider.favouritePicturesService
+                    .getLoadingStateWithDataObservable()
+                    .map { loadingStateWithPictures in loadingStateWithPictures.data }
                     .map { Mutation.popularPicturesChanged($0)}
+
+                return Observable.merge([dataObservable, popularObservable])
             case let .focusedItemChanged(picture):
                 return self.provider.focusedPictureService
                     .setFocusedPicture(picture)
                     .map { .ignore }
             case let .popularItemChanged(picture):
-                return self.provider.popularPicturesService
+                return self.provider.favouritePicturesService
                     .togglePopular(forPicture: picture)
-                    .map { _ in .ignore }
                     .asObservable()
+                    .map { _ in .ignore }
         }
     }
     
@@ -43,6 +53,9 @@ class PictureDetailReactor: BaseReactor {
         switch mutation {
             case let .popularPicturesChanged(popularPictures):
                 state.popularPictures = popularPictures
+                break
+            case let .picturesChanged(pictures):
+                state.pictures = pictures
                 break
             case .ignore:
                 break
@@ -61,6 +74,7 @@ extension PictureDetailReactor {
     
     enum Mutation {
         case ignore
+        case picturesChanged([Picture])
         case popularPicturesChanged([Picture])
     }
     

@@ -13,10 +13,6 @@ class FocusedPictureService: BaseService, FocusedPictureServiceType {
     
     func setFocusedPicture(_ picture: Picture) -> Observable<Void> {
         focusedPictureSubject.onNext(picture)
-        print()
-        print(picture.title)
-        print(picture.id)
-        print()
         return Observable.just(Void())
     }
     

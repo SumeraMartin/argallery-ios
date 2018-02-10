@@ -3,14 +3,20 @@ import RealmSwift
 
 protocol RealmProviderServiceType {
 
-    func getDefaultRealmInstance() -> Single<Realm>
+    func getDefaultRealmInstanceSingle() -> Single<Realm>
+    
+    func getDefaultRealmInstance() -> Realm
 }
 
 class RealmProviderService: BaseService, RealmProviderServiceType {
 
     var realm = try! Realm()
 
-    func getDefaultRealmInstance() -> Single<Realm> {
+    func getDefaultRealmInstanceSingle() -> Single<Realm> {
         return Single.just(realm)
+    }
+    
+    func getDefaultRealmInstance() -> Realm {
+        return realm
     }
 }

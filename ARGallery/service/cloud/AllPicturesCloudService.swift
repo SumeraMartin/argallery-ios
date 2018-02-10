@@ -1,28 +1,17 @@
 import RxSwift
 import KenticoCloud
 
-protocol PictureCloudServiceType {
-    
-    func getLoadingStateWithDataObservable() -> Observable<LoadingStateWithPictures>
-    
-    func getLoadingStateWithDataSingle() -> Single<LoadingStateWithPictures>
-    
-    func getPictures() -> [Picture]
-    
-    func loadMore() -> Single<Void>
-    
-    func reload() -> Single<Void>
-}
-
-class PictureCloudService: BaseService, PictureCloudServiceType {
+class AllPicturesCloudService: BaseService, PictureDataSourceServiceType {
     
     typealias ReloadData = Bool
     
-    static let limit = 1
+    var dataSource = DataSourceType.all
     
-    let startLoadingSubject = PublishSubject<ReloadData>()
+    private static let limit = 1
     
-    let stateSubject = BehaviorSubject(value: LoadingStateWithPictures.createDefault())
+    private let startLoadingSubject = PublishSubject<ReloadData>()
+    
+    private let stateSubject = BehaviorSubject(value: LoadingStateWithPictures.createDefault())
     
     override init(provider: ServiceProviderType) {
         super.init(provider: provider)
@@ -47,14 +36,20 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
         }
     }
     
-    func loadMore() -> Single<Void> {
-        startLoadingSubject.onNext(false)
-        return Single.just(Void())
+    func loadMore() {
+        self.startLoadingSubject.onNext(false)
     }
     
-    func reload() -> Single<Void> {
-        startLoadingSubject.onNext(true)
-        return Single.just(Void())
+    func reload() {
+        self.startLoadingSubject.onNext(true)
+    }
+    
+    func wasSelected() {
+        // DO nothing
+    }
+    
+    func buildQuery(_ query: Query) -> Query {
+        return query
     }
     
     private func initializeSubscription() {
@@ -66,16 +61,11 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
                 }
                 return state
             }
-            .withLatestFrom(self.provider.filterService.getCurrentFilterOnce()) { state, filter in
-                return (state, filter)
-            }
-            
-            .flatMapLatest { stateAndFilter -> Observable<LoadingStateWithPictures> in
-                var (state, filter) = stateAndFilter
+            .flatMapLatest { state -> Observable<LoadingStateWithPictures> in
+                var state = state
                 state.loadingState = .loading
-                
                 let loadingStateWithPreviousDataObservable = Observable.just(state)
-                let loadPicturesObservable = self.getPictures(loadingStateWithPictures: state, filter: filter)
+                let loadPicturesObservable = self.getPictures(loadingStateWithPictures: state)
                 return Observable.merge(loadPicturesObservable, loadingStateWithPreviousDataObservable)
             }
             .subscribe(onNext: { loadingStateWithPictures in
@@ -84,32 +74,31 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
             .disposed(by: disposeBag)
     }
     
-    private func getPictures(loadingStateWithPictures: LoadingStateWithPictures, filter: Filter) -> Observable<LoadingStateWithPictures> {
-        return provider.kenticoClientService
-            .getClient()
-            .flatMap { client -> Observable<Result<[CloudPicture]>> in
-                let limit = PictureCloudService.limit
+    private func getPictures(loadingStateWithPictures: LoadingStateWithPictures) -> Observable<LoadingStateWithPictures> {
+        return provider.kenticoClientService.getClient()
+            .flatMapLatest { client -> Observable<Result<[CloudPicture]>> in
+                let limit = AllPicturesCloudService.limit
                 let offset = loadingStateWithPictures.data.count + 1
-                return self.fetchData(offset: offset, limit: limit, filter: filter, client: client)
+                return self.fetchData(offset: offset, limit: limit, client: client)
             }
             .map { result in result.map { pictures in pictures.map { $0.toPicture() } } }
             .map { result in
                 switch result {
                     case let .Success(data):
                         if data.count == 0 {
-                            return LoadingStateWithPictures(loadingState: .completed, data: loadingStateWithPictures.data)
+                            return LoadingStateWithPictures(dataSource: self.dataSource, loadingState: .completed, data: loadingStateWithPictures.data)
                         }
-                        return LoadingStateWithPictures(loadingState: .inactive, data: loadingStateWithPictures.data + data)
+                        return LoadingStateWithPictures(dataSource: self.dataSource, loadingState: .inactive, data: loadingStateWithPictures.data + data)
                     case .Failure(_):
-                        return LoadingStateWithPictures(loadingState: .error, data: loadingStateWithPictures.data)
+                        return LoadingStateWithPictures(dataSource: self.dataSource, loadingState: .error, data: loadingStateWithPictures.data)
                 }
             }
-            .delay(RxTimeInterval(5), scheduler: MainScheduler.instance)
+//            .delay(RxTimeInterval(5), scheduler: MainScheduler.instance)
     }
     
-    private func fetchData(offset: Int, limit: Int, filter: Filter, client: DeliveryClient) -> Observable<Result<[CloudPicture]>> {
+    private func fetchData(offset: Int, limit: Int, client: DeliveryClient) -> Observable<Result<[CloudPicture]>> {
         return Observable.create { observer in
-            let query = self.createQuery(offset: offset, limit: limit, filter: filter)
+            let query = self.buildQuery(self.createLimitOffsetQuery(offset: offset, limit: limit)).build()
             client.getItems(modelType: CloudPicture.self, customQuery: query) { (isSuccess, itemsResponse, error) in
                 if isSuccess {
                     if let pictures = itemsResponse?.items {
@@ -131,13 +120,9 @@ class PictureCloudService: BaseService, PictureCloudServiceType {
         }
     }
     
-    private func createQuery(offset: Int, limit: Int, filter: Filter) -> String {
+    private func createLimitOffsetQuery(offset: Int, limit: Int) -> Query {
         return Query(systemType: "picture")
             .add(key: "limit", value: limit)
             .add(key: "skip", value: offset)
-            //                        .add(key: "elements.price[gte]", value: filter.minPrice)
-            //                        .add(key: "elements.price[lte]", value: filter.maxPrice)
-            //                        .add(key: "system.id[in]", value: "f99e2d6f-f6a4-4cc9-8ecd-02e10f1501c9" )
-            .build()
     }
 }
