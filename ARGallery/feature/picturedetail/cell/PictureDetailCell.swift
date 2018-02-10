@@ -20,6 +20,8 @@ class PictureDetailCell: BaseCollectionViewCell {
     
     let descriptionTitleHeight = CGFloat(80)
     
+    var arIconTapDelegate: ARIconTapDelegate? = nil
+    
     var delegate: PictureDetailCellDelegate?
     
     var blurVisualEffect = UIVisualEffectView(effect: UIBlurEffect(style: .light))
@@ -95,7 +97,7 @@ class PictureDetailCell: BaseCollectionViewCell {
             BottomSheetSection(model: "details", items: [BottomSheetSectionItem.details]),
             BottomSheetSection(model: "description", items: [BottomSheetSectionItem.description]),
         ]
-    
+            
         Observable.just(descriptionModels)
             .bind(to: descriptionTableView.rx.items(dataSource: descriptionDataSource))
             .disposed(by: self.disposeBagCell)
@@ -266,6 +268,9 @@ extension PictureDetailCell {
             switch dataSource[index] {
             case .title:
                 let cell = tableView.dequeueReusableCell(withIdentifier: TitleBottomSheetCell.identifier, for: index) as! TitleBottomSheetCell
+                
+                cell.delegate = self.arIconTapDelegate
+                
                 cell.bind(picture)
                 return cell
             case .details:

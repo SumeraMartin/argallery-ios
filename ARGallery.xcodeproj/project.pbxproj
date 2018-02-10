@@ -37,6 +37,8 @@
 		5B88E7832014FAD900502F97 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E7822014FAD900502F97 /* Query.swift */; };
 		5B957D5E202EF65700B8B61F /* TransitionAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */; };
 		5B957D60202EF68900B8B61F /* TransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */; };
+		5B957D63202F63FE00B8B61F /* ARSceneReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */; };
+		5B957D65202F645000B8B61F /* ARSceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D64202F645000B8B61F /* ARSceneViewController.swift */; };
 		5BAB92E7201A5B0E00EDC2C9 /* DummyReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAB92E6201A5B0E00EDC2C9 /* DummyReusableView.swift */; };
 		5BAC222D20226406009D8983 /* TitleBottomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */; };
 		5BAC222F20226458009D8983 /* DetailsBotomSheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */; };
@@ -105,6 +107,8 @@
 		5B88E7822014FAD900502F97 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimations.swift; sourceTree = "<group>"; };
 		5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimator.swift; sourceTree = "<group>"; };
+		5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSceneReactor.swift; sourceTree = "<group>"; };
+		5B957D64202F645000B8B61F /* ARSceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSceneViewController.swift; sourceTree = "<group>"; };
 		5BAB92E6201A5B0E00EDC2C9 /* DummyReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyReusableView.swift; sourceTree = "<group>"; };
 		5BAC222C20226406009D8983 /* TitleBottomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleBottomSheetCell.swift; sourceTree = "<group>"; };
 		5BAC222E20226458009D8983 /* DetailsBotomSheetCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsBotomSheetCell.swift; sourceTree = "<group>"; };
@@ -253,6 +257,15 @@
 			path = animation;
 			sourceTree = "<group>";
 		};
+		5B957D61202F63C500B8B61F /* arscene */ = {
+			isa = PBXGroup;
+			children = (
+				5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */,
+				5B957D64202F645000B8B61F /* ARSceneViewController.swift */,
+			);
+			path = arscene;
+			sourceTree = "<group>";
+		};
 		5BAC222B202263E9009D8983 /* bottomsheet */ = {
 			isa = PBXGroup;
 			children = (
@@ -270,6 +283,7 @@
 				5BAC7E0F2010906B00F33F1A /* picturelist */,
 				5B88E77A2014CC7400502F97 /* picturedetail */,
 				5BFFAB822015D4A30044C0D2 /* filter */,
+				5B957D61202F63C500B8B61F /* arscene */,
 			);
 			name = view;
 			path = feature;
@@ -594,6 +608,7 @@
 				5B102742201F9B3C00E9BE4C /* LoadingStateWithPictures.swift in Sources */,
 				5BAC222D20226406009D8983 /* TitleBottomSheetCell.swift in Sources */,
 				5BAC7E322010C4BE00F33F1A /* ReactorProvider.swift in Sources */,
+				5B957D65202F645000B8B61F /* ARSceneViewController.swift in Sources */,
 				5B88E7832014FAD900502F97 /* Query.swift in Sources */,
 				5B76874D201E32B9006C54D3 /* CloudPictureMapper.swift in Sources */,
 				5B3B9DE02021071900FE629D /* DescriptionBotomSheetCell.swift in Sources */,
@@ -629,6 +644,7 @@
 				5B424CE5201CE9D100BF1CD9 /* PictureInfoCell.swift in Sources */,
 				5B88E7802014CF3E00502F97 /* PictureDetailReactor.swift in Sources */,
 				5B88E7792013A56700502F97 /* LoadingMoreCell.swift in Sources */,
+				5B957D63202F63FE00B8B61F /* ARSceneReactor.swift in Sources */,
 				5B76874B201E31CE006C54D3 /* Picture.swift in Sources */,
 				5B79B257201CFFCF00680951 /* ScrollSpeedEvaluator.swift in Sources */,
 				5BEE7967202CDDE100CC7F05 /* Completable.swift in Sources */,

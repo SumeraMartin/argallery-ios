@@ -14,8 +14,6 @@ class PictureDetailViewController: BaseViewController, ReactorKit.View  {
     
     @IBOutlet weak var backButton: UIImageView!
     
-    @IBOutlet weak var popularView: UIImageView!
-    
     var panGestureRecognizer = UIPanGestureRecognizer()
     
     var rxDataSource: RxCollectionViewSectionedAnimatedDataSource<Section>!
@@ -106,6 +104,7 @@ extension PictureDetailViewController {
                 case let .pictureDetail(picture):
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PictureDetailCell.identifier, for: indexPath) as! PictureDetailCell
                     
+                    cell.arIconTapDelegate = self
                     cell.delegate = self
                     cell.bind(picture)
                     
@@ -172,6 +171,12 @@ extension PictureDetailViewController: UIGestureRecognizerDelegate {
             return v.y > abs(v.x)
         }
         return false
+    }
+}
+
+extension PictureDetailViewController: ARIconTapDelegate {
+    func tap() {
+        self.performSegue(withIdentifier: ARSceneViewController.sequeIdentifier, sender: nil)
     }
 }
 

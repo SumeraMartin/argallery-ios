@@ -659,21 +659,32 @@
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Le-2d-bHd" userLabel="Title">
-                                                                        <rect key="frame" x="36" y="12.000000000000002" width="303" height="19.666666666666671"/>
+                                                                        <rect key="frame" x="36" y="12" width="235" height="20"/>
                                                                         <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
                                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
+                                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="fVN-B9-C5K" userLabel="AR Icon">
+                                                                        <rect key="frame" x="295" y="0.0" width="80" height="43.666666666666664"/>
+                                                                        <color key="backgroundColor" red="1" green="0.33011798469387754" blue="0.25077062074829931" alpha="1" colorSpace="calibratedRGB"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="80" id="5xi-Vf-enk"/>
+                                                                        </constraints>
+                                                                    </imageView>
                                                                 </subviews>
                                                                 <constraints>
+                                                                    <constraint firstAttribute="bottom" secondItem="fVN-B9-C5K" secondAttribute="bottom" id="4w3-9Q-2gm"/>
                                                                     <constraint firstAttribute="bottom" secondItem="7Le-2d-bHd" secondAttribute="bottom" constant="12" id="F7O-k5-SZi"/>
                                                                     <constraint firstItem="7Le-2d-bHd" firstAttribute="top" secondItem="sZr-LG-lyq" secondAttribute="top" constant="12" id="OeJ-e1-NvE"/>
+                                                                    <constraint firstItem="fVN-B9-C5K" firstAttribute="leading" secondItem="7Le-2d-bHd" secondAttribute="trailing" constant="24" id="cnM-Op-G54"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="fVN-B9-C5K" secondAttribute="trailing" id="epg-0e-cDn"/>
                                                                     <constraint firstItem="7Le-2d-bHd" firstAttribute="leading" secondItem="sZr-LG-lyq" secondAttribute="leading" constant="36" id="ok1-nm-EQ2"/>
-                                                                    <constraint firstAttribute="trailing" secondItem="7Le-2d-bHd" secondAttribute="trailing" constant="36" id="x2v-A4-cXp"/>
+                                                                    <constraint firstItem="fVN-B9-C5K" firstAttribute="top" secondItem="sZr-LG-lyq" secondAttribute="top" id="xlZ-fL-mxX"/>
                                                                 </constraints>
                                                             </tableViewCellContentView>
                                                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.65000000000000002" colorSpace="custom" customColorSpace="sRGB"/>
                                                             <connections>
+                                                                <outlet property="arSceneIcon" destination="fVN-B9-C5K" id="EkF-fe-hKg"/>
                                                                 <outlet property="title" destination="7Le-2d-bHd" id="wxn-n9-7No"/>
                                                             </connections>
                                                         </tableViewCell>
@@ -886,11 +897,41 @@
                     <connections>
                         <outlet property="backButton" destination="wnp-d8-HjC" id="K5i-eY-of7"/>
                         <outlet property="picturesCollectionView" destination="D1U-oO-YtD" id="Egc-6V-W9T"/>
+                        <segue destination="Y3h-wx-9tc" kind="show" identifier="show_arscene_seque" id="BDi-h2-X9E"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eqp-Dm-hQA" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1368.8" y="500.24630541871926"/>
+        </scene>
+        <!--Scene View Controller-->
+        <scene sceneID="XLd-55-Lzv">
+            <objects>
+                <viewController id="Y3h-wx-9tc" customClass="ARSceneViewController" customModule="ARGallery" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="UaI-JV-qPJ">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Gmf-ZG-aPf">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                            </arscnView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Gmf-ZG-aPf" firstAttribute="leading" secondItem="wan-TB-Tjc" secondAttribute="leading" id="Ji3-3o-zDG"/>
+                            <constraint firstItem="Gmf-ZG-aPf" firstAttribute="trailing" secondItem="wan-TB-Tjc" secondAttribute="trailing" id="XnS-3h-Dk0"/>
+                            <constraint firstAttribute="bottom" secondItem="Gmf-ZG-aPf" secondAttribute="bottom" id="mnk-Cg-zOY"/>
+                            <constraint firstItem="Gmf-ZG-aPf" firstAttribute="top" secondItem="UaI-JV-qPJ" secondAttribute="top" id="scU-6c-fsQ"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="wan-TB-Tjc"/>
+                    </view>
+                    <connections>
+                        <outlet property="scene" destination="Gmf-ZG-aPf" id="nO7-E2-vJB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Hj8-r5-d4c" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2256.8000000000002" y="502.46305418719214"/>
         </scene>
     </scenes>
     <resources>
