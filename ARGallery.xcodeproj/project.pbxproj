@@ -35,6 +35,13 @@
 		5B88E77E2014CCC200502F97 /* BaseCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E77D2014CCC200502F97 /* BaseCollectionViewCell.swift */; };
 		5B88E7802014CF3E00502F97 /* PictureDetailReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E77F2014CF3E00502F97 /* PictureDetailReactor.swift */; };
 		5B88E7832014FAD900502F97 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B88E7822014FAD900502F97 /* Query.swift */; };
+		5B8C5D5520417217003D7D22 /* TrackingNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5420417217003D7D22 /* TrackingNode.swift */; };
+		5B8C5D5720417243003D7D22 /* Wall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5620417243003D7D22 /* Wall.swift */; };
+		5B8C5D5920417358003D7D22 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5820417358003D7D22 /* CGPoint.swift */; };
+		5B8C5D5B2041ADB7003D7D22 /* WallTrackState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5A2041ADB7003D7D22 /* WallTrackState.swift */; };
+		5B8C5D5D2041D1A7003D7D22 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5C2041D1A7003D7D22 /* Image.swift */; };
+		5B8C5D632042DC5F003D7D22 /* grid-material.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B8C5D622042DC5F003D7D22 /* grid-material.png */; };
+		5B8C5D6520431575003D7D22 /* ARSessionRxDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */; };
 		5B957D5E202EF65700B8B61F /* TransitionAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */; };
 		5B957D60202EF68900B8B61F /* TransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */; };
 		5B957D63202F63FE00B8B61F /* ARSceneReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */; };
@@ -105,6 +112,13 @@
 		5B88E77D2014CCC200502F97 /* BaseCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionViewCell.swift; sourceTree = "<group>"; };
 		5B88E77F2014CF3E00502F97 /* PictureDetailReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureDetailReactor.swift; sourceTree = "<group>"; };
 		5B88E7822014FAD900502F97 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
+		5B8C5D5420417217003D7D22 /* TrackingNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingNode.swift; sourceTree = "<group>"; };
+		5B8C5D5620417243003D7D22 /* Wall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wall.swift; sourceTree = "<group>"; };
+		5B8C5D5820417358003D7D22 /* CGPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
+		5B8C5D5A2041ADB7003D7D22 /* WallTrackState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallTrackState.swift; sourceTree = "<group>"; };
+		5B8C5D5C2041D1A7003D7D22 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
+		5B8C5D622042DC5F003D7D22 /* grid-material.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grid-material.png"; sourceTree = "<group>"; };
+		5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionRxDelegate.swift; sourceTree = "<group>"; };
 		5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimations.swift; sourceTree = "<group>"; };
 		5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimator.swift; sourceTree = "<group>"; };
 		5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSceneReactor.swift; sourceTree = "<group>"; };
@@ -248,6 +262,25 @@
 			path = kentico;
 			sourceTree = "<group>";
 		};
+		5B8C5D5320417206003D7D22 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				5B8C5D5420417217003D7D22 /* TrackingNode.swift */,
+				5B8C5D5620417243003D7D22 /* Wall.swift */,
+				5B8C5D5A2041ADB7003D7D22 /* WallTrackState.swift */,
+				5B8C5D5C2041D1A7003D7D22 /* Image.swift */,
+			);
+			path = model;
+			sourceTree = "<group>";
+		};
+		5B8C5D612042DC40003D7D22 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5B8C5D622042DC5F003D7D22 /* grid-material.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		5B957D5C202EF63800B8B61F /* animation */ = {
 			isa = PBXGroup;
 			children = (
@@ -260,6 +293,7 @@
 		5B957D61202F63C500B8B61F /* arscene */ = {
 			isa = PBXGroup;
 			children = (
+				5B8C5D5320417206003D7D22 /* model */,
 				5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */,
 				5B957D64202F645000B8B61F /* ARSceneViewController.swift */,
 			);
@@ -339,6 +373,7 @@
 				5B88E7812014FAC600502F97 /* kentico */,
 				5BAC7E332010CD8E00F33F1A /* extensions */,
 				5BAC7E25201099D600F33F1A /* Result.swift */,
+				5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -375,6 +410,7 @@
 				5B88E77420137F8200502F97 /* ObservableType.swift */,
 				5BEE7966202CDDE100CC7F05 /* Completable.swift */,
 				5BEE7968202CE5B200CC7F05 /* Single.swift */,
+				5B8C5D5820417358003D7D22 /* CGPoint.swift */,
 			);
 			path = extensions;
 			sourceTree = "<group>";
@@ -411,6 +447,7 @@
 		5BBF0844200FEA73009E1FBA /* ARGallery */ = {
 			isa = PBXGroup;
 			children = (
+				5B8C5D612042DC40003D7D22 /* Resources */,
 				5B3D2837200FF4FF00143733 /* model */,
 				5BAC7E12201091F300F33F1A /* service */,
 				5BAC7E2E2010BF5A00F33F1A /* injection */,
@@ -533,6 +570,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B8C5D632042DC5F003D7D22 /* grid-material.png in Resources */,
 				5BBF0850200FEA73009E1FBA /* LaunchScreen.storyboard in Resources */,
 				5BBF084B200FEA73009E1FBA /* Main.storyboard in Resources */,
 			);
@@ -610,10 +648,12 @@
 				5BAC7E322010C4BE00F33F1A /* ReactorProvider.swift in Sources */,
 				5B957D65202F645000B8B61F /* ARSceneViewController.swift in Sources */,
 				5B88E7832014FAD900502F97 /* Query.swift in Sources */,
+				5B8C5D5720417243003D7D22 /* Wall.swift in Sources */,
 				5B76874D201E32B9006C54D3 /* CloudPictureMapper.swift in Sources */,
 				5B3B9DE02021071900FE629D /* DescriptionBotomSheetCell.swift in Sources */,
 				5B957D60202EF68900B8B61F /* TransitionAnimator.swift in Sources */,
 				5B79B254201CF67500680951 /* PictureInfoSection.swift in Sources */,
+				5B8C5D5920417358003D7D22 /* CGPoint.swift in Sources */,
 				5B76874F201E330C006C54D3 /* PopularPictureMapper.swift in Sources */,
 				5BAC7E2820109BE400F33F1A /* PictureListReactor.swift in Sources */,
 				5BEE795F202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift in Sources */,
@@ -626,16 +666,20 @@
 				5BAC7E392010F33D00F33F1A /* PictureCell.swift in Sources */,
 				5BFFAB862015D5A30044C0D2 /* FilterReactor.swift in Sources */,
 				5BAC7E172010924900F33F1A /* AllPicturesCloudService.swift in Sources */,
+				5B8C5D6520431575003D7D22 /* ARSessionRxDelegate.swift in Sources */,
 				5BC5919B201DD341002EA20F /* FocusedPictureService.swift in Sources */,
 				5BAC7E1A2010928700F33F1A /* BaseService.swift in Sources */,
 				5B3B9DE620210FDA00FE629D /* TableViewWithTransparentHeader.swift in Sources */,
 				5B3B9DE22021077300FE629D /* BaseTableViewCell.swift in Sources */,
 				5BAC7E2B20109C1100F33F1A /* BaseReactor.swift in Sources */,
+				5B8C5D5520417217003D7D22 /* TrackingNode.swift in Sources */,
 				5BC75F6E2017BDBE00A595AE /* PictureDetailSectionItem.swift in Sources */,
 				5B79B25B201D078900680951 /* FocusedItemEvaluator.swift in Sources */,
 				5BFFAB882015EFB20044C0D2 /* FilterService.swift in Sources */,
 				5B2FBBAA2028F7E100DD3210 /* CurrentDataSourceService.swift in Sources */,
+				5B8C5D5D2041D1A7003D7D22 /* Image.swift in Sources */,
 				5B88E77520137F8200502F97 /* ObservableType.swift in Sources */,
+				5B8C5D5B2041ADB7003D7D22 /* WallTrackState.swift in Sources */,
 				5B88E7732013777300502F97 /* PictureSection.swift in Sources */,
 				5BC5919E201E0976002EA20F /* RealmProviderService.swift in Sources */,
 				5BAC7E302010BF6C00F33F1A /* AppAssembler.swift in Sources */,
@@ -793,9 +837,11 @@
 			baseConfigurationReference = 331EB1113A8BD5570B5BF501 /* Pods-ARGallery.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UGR4K46F7Y;
 				INFOPLIST_FILE = ARGallery/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sumera.ARGallery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -809,9 +855,11 @@
 			baseConfigurationReference = C57D63501895B2245D7BD9C4 /* Pods-ARGallery.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UGR4K46F7Y;
 				INFOPLIST_FILE = ARGallery/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sumera.ARGallery;
 				PRODUCT_NAME = "$(TARGET_NAME)";

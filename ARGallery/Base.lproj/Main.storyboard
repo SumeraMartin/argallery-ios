@@ -915,6 +915,11 @@
                             <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Gmf-ZG-aPf">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                             </arscnView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bYn-5T-ocs">
+                                <rect key="frame" x="313" y="44" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="RESET"/>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -926,6 +931,7 @@
                         <viewLayoutGuide key="safeArea" id="wan-TB-Tjc"/>
                     </view>
                     <connections>
+                        <outlet property="resetButton" destination="bYn-5T-ocs" id="aQr-Od-emY"/>
                         <outlet property="scene" destination="Gmf-ZG-aPf" id="nO7-E2-vJB"/>
                     </connections>
                 </viewController>

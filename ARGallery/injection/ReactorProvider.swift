@@ -7,6 +7,8 @@ protocol ReactorProviderType {
     func createPictureDetailReactor(initialPicture: Picture) -> PictureDetailReactor
     
     func createFilterReactor() -> FilterReactor
+    
+    func createArSceneReactor() -> ARSceneReactor
 }
 
 class ReactorProvider: ReactorProviderType {
@@ -30,5 +32,9 @@ class ReactorProvider: ReactorProviderType {
     
     func createFilterReactor() -> FilterReactor {
         return FilterReactor(provider: serviceProvider)
+    }
+    
+    func createArSceneReactor() -> ARSceneReactor {
+        return ARSceneReactor(provider: serviceProvider)
     }
 }
