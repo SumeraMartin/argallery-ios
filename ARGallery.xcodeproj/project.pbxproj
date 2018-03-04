@@ -39,7 +39,7 @@
 		5B8C5D5720417243003D7D22 /* Wall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5620417243003D7D22 /* Wall.swift */; };
 		5B8C5D5920417358003D7D22 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5820417358003D7D22 /* CGPoint.swift */; };
 		5B8C5D5B2041ADB7003D7D22 /* WallTrackState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5A2041ADB7003D7D22 /* WallTrackState.swift */; };
-		5B8C5D5D2041D1A7003D7D22 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5C2041D1A7003D7D22 /* Image.swift */; };
+		5B8C5D5D2041D1A7003D7D22 /* PictureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5C2041D1A7003D7D22 /* PictureNode.swift */; };
 		5B8C5D632042DC5F003D7D22 /* grid-material.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B8C5D622042DC5F003D7D22 /* grid-material.png */; };
 		5B8C5D6520431575003D7D22 /* ARSessionRxDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */; };
 		5B957D5E202EF65700B8B61F /* TransitionAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */; };
@@ -75,6 +75,8 @@
 		5BEE7963202CD98500CC7F05 /* FilteredPicturesCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE7962202CD98500CC7F05 /* FilteredPicturesCloudService.swift */; };
 		5BEE7967202CDDE100CC7F05 /* Completable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE7966202CDDE100CC7F05 /* Completable.swift */; };
 		5BEE7969202CE5B200CC7F05 /* Single.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BEE7968202CE5B200CC7F05 /* Single.swift */; };
+		5BF0AC08204AE8190080FB5D /* SelectedPictureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF0AC07204AE8190080FB5D /* SelectedPictureService.swift */; };
+		5BF0AC0A204AF2130080FB5D /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF0AC09204AF2130080FB5D /* UIImage.swift */; };
 		5BFFAB842015D5950044C0D2 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFFAB832015D5950044C0D2 /* FilterViewController.swift */; };
 		5BFFAB862015D5A30044C0D2 /* FilterReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFFAB852015D5A30044C0D2 /* FilterReactor.swift */; };
 		5BFFAB882015EFB20044C0D2 /* FilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFFAB872015EFB20044C0D2 /* FilterService.swift */; };
@@ -116,7 +118,7 @@
 		5B8C5D5620417243003D7D22 /* Wall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wall.swift; sourceTree = "<group>"; };
 		5B8C5D5820417358003D7D22 /* CGPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		5B8C5D5A2041ADB7003D7D22 /* WallTrackState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallTrackState.swift; sourceTree = "<group>"; };
-		5B8C5D5C2041D1A7003D7D22 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
+		5B8C5D5C2041D1A7003D7D22 /* PictureNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureNode.swift; sourceTree = "<group>"; };
 		5B8C5D622042DC5F003D7D22 /* grid-material.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grid-material.png"; sourceTree = "<group>"; };
 		5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionRxDelegate.swift; sourceTree = "<group>"; };
 		5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionAnimations.swift; sourceTree = "<group>"; };
@@ -154,6 +156,8 @@
 		5BEE7962202CD98500CC7F05 /* FilteredPicturesCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredPicturesCloudService.swift; sourceTree = "<group>"; };
 		5BEE7966202CDDE100CC7F05 /* Completable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Completable.swift; sourceTree = "<group>"; };
 		5BEE7968202CE5B200CC7F05 /* Single.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Single.swift; sourceTree = "<group>"; };
+		5BF0AC07204AE8190080FB5D /* SelectedPictureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedPictureService.swift; sourceTree = "<group>"; };
+		5BF0AC09204AF2130080FB5D /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		5BFFAB832015D5950044C0D2 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		5BFFAB852015D5A30044C0D2 /* FilterReactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterReactor.swift; sourceTree = "<group>"; };
 		5BFFAB872015EFB20044C0D2 /* FilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterService.swift; sourceTree = "<group>"; };
@@ -268,7 +272,7 @@
 				5B8C5D5420417217003D7D22 /* TrackingNode.swift */,
 				5B8C5D5620417243003D7D22 /* Wall.swift */,
 				5B8C5D5A2041ADB7003D7D22 /* WallTrackState.swift */,
-				5B8C5D5C2041D1A7003D7D22 /* Image.swift */,
+				5B8C5D5C2041D1A7003D7D22 /* PictureNode.swift */,
 			);
 			path = model;
 			sourceTree = "<group>";
@@ -344,6 +348,7 @@
 				5BC5919A201DD341002EA20F /* FocusedPictureService.swift */,
 				5B2FBBA92028F7E100DD3210 /* CurrentDataSourceService.swift */,
 				5BEE795E202CD6BD00CC7F05 /* PictureDataSourceServiceType.swift */,
+				5BF0AC07204AE8190080FB5D /* SelectedPictureService.swift */,
 			);
 			path = service;
 			sourceTree = "<group>";
@@ -374,6 +379,7 @@
 				5BAC7E332010CD8E00F33F1A /* extensions */,
 				5BAC7E25201099D600F33F1A /* Result.swift */,
 				5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */,
+				5BF0AC09204AF2130080FB5D /* UIImage.swift */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -633,6 +639,7 @@
 			files = (
 				5BAC7E26201099D600F33F1A /* Result.swift in Sources */,
 				5B3D2839200FF51200143733 /* CloudPicture.swift in Sources */,
+				5BF0AC0A204AF2130080FB5D /* UIImage.swift in Sources */,
 				5B79B259201D02D600680951 /* CollectionCellsTransformer.swift in Sources */,
 				5BFFAB8A2015F0070044C0D2 /* Filter.swift in Sources */,
 				5BAB92E7201A5B0E00EDC2C9 /* DummyReusableView.swift in Sources */,
@@ -676,8 +683,9 @@
 				5BC75F6E2017BDBE00A595AE /* PictureDetailSectionItem.swift in Sources */,
 				5B79B25B201D078900680951 /* FocusedItemEvaluator.swift in Sources */,
 				5BFFAB882015EFB20044C0D2 /* FilterService.swift in Sources */,
+				5BF0AC08204AE8190080FB5D /* SelectedPictureService.swift in Sources */,
 				5B2FBBAA2028F7E100DD3210 /* CurrentDataSourceService.swift in Sources */,
-				5B8C5D5D2041D1A7003D7D22 /* Image.swift in Sources */,
+				5B8C5D5D2041D1A7003D7D22 /* PictureNode.swift in Sources */,
 				5B88E77520137F8200502F97 /* ObservableType.swift in Sources */,
 				5B8C5D5B2041ADB7003D7D22 /* WallTrackState.swift in Sources */,
 				5B88E7732013777300502F97 /* PictureSection.swift in Sources */,

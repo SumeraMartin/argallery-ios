@@ -16,6 +16,7 @@ protocol ServiceProviderType: class {
     
     var favouritePicturesService: FavouriteDataSourceServiceType { get }
     
+    var selectedPictureService: SelectedPictureServiceType { get }
 }
 
 final class ServiceProvider: ServiceProviderType {
@@ -35,5 +36,7 @@ final class ServiceProvider: ServiceProviderType {
     lazy var favouritePicturesService: FavouriteDataSourceServiceType = FavouritePicturesService(provider: self)
     
     lazy var currentDataSourceService: CurrentDataSourceServiceType = CurrentDataSourceService(provider: self)
+    
+    lazy var selectedPictureService: SelectedPictureServiceType = SelectedImageService(provider: self)
 }
 

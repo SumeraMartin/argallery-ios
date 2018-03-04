@@ -7,6 +7,7 @@ PODS:
     - ObjectMapper (~> 2.0)
   - BEMCheckBox (1.4.1)
   - Differentiator (3.0.2)
+  - Floaty (3.0.1)
   - Hero (1.0.1)
   - Kanna (2.2.1)
   - KenticoCloud (0.2.0):
@@ -41,6 +42,7 @@ PODS:
 DEPENDENCIES:
   - AlamofireImage (~> 3.3)
   - BEMCheckBox
+  - Floaty (~> 3.0.0)
   - Hero
   - KenticoCloud
   - NVActivityIndicatorView
@@ -58,6 +60,7 @@ SPEC CHECKSUMS:
   AlamofireObjectMapper: 435adc82f5b367679bd9e71c4974a54efd0b2521
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   Differentiator: a87be69eba49ec4ab460c7671143ee3a9eececfd
+  Floaty: bb7a353deee9ddcc14c584ca9c538efdc19669f2
   Hero: cee286821578e170d8c0c9c9cda7897357401112
   Kanna: 182789ab065e8f9a6ccc2a74ce6283d3401c0c4a
   KenticoCloud: 5f0972768387550f238239221e8b2e4ad6b395b1
@@ -73,6 +76,6 @@ SPEC CHECKSUMS:
   RxSwift: fd680d75283beb5e2559486f3c0ff852f0d35334
   TTRangeSlider: 2f2ce4a33b32bb323c6575b9f5161c4664459c58
 
-PODFILE CHECKSUM: 23f1c8d14a1333d1c7b2ba59bc2a33eb36de1980
+PODFILE CHECKSUM: bedf5e7ff3fc61e21f7edca528508e7c4b391005
 
 COCOAPODS: 1.2.1

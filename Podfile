@@ -20,6 +20,7 @@ target ‘ARGallery’ do
     pod 'Hero'
     pod 'TTRangeSlider'
     pod 'BEMCheckBox'
+    pod 'Floaty', '~> 3.0.0'
     
     # Persistence
     pod 'RealmSwift'

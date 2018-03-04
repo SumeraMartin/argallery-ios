@@ -13,9 +13,7 @@ class Wall {
     class func wallMaterial() -> SCNMaterial {
         let mat = SCNMaterial()
         mat.diffuse.contents = UIColor.darkGray
-        mat.transparency = 0.3
-        
-        // dont care if wall turns away from us, still render it
+        mat.transparency = 0.5
         mat.isDoubleSided = true
         return mat
     }
@@ -23,25 +21,10 @@ class Wall {
     class func maskMaterial() -> SCNMaterial {
         let maskMaterial = SCNMaterial()
         maskMaterial.diffuse.contents = UIColor.white
-        
-        // another way to do this is to set a very very low transparency value (but that
-        // would not receive shadows..)
-        // mask out everything we would have drawn..
         maskMaterial.colorBufferWriteMask = SCNColorMask(rawValue: 0)
-        
-        // occlude (render) from both sides please
         maskMaterial.isDoubleSided = true
         return maskMaterial
     }
-    
-//    class func makeInvisibleOccludingWall(wallNode:SCNNode) {
-//        wallNode.geometry?.firstMaterial = maskMaterial()
-//
-//        wallNode.physicsBody = SCNPhysicsBody(type: .static,
-//                                              shape: nil)
-//        wallNode.physicsBody?.categoryBitMask = CollisionTypes.wall.rawValue
-//        wallNode.physicsBody?.collisionBitMask = CollisionTypes.beachball.rawValue
-//    }
     
     class func node(from:SCNVector3,
                     to:SCNVector3) -> SCNNode {
@@ -52,26 +35,42 @@ class Wall {
         wall.firstMaterial = wallMaterial()
         let node = SCNNode(geometry: wall)
         node.name = NAME
-        
-        // always render before the beachballs
         node.renderingOrder = -10
+        node.position = SCNVector3(from.x + (to.x - from.x) * 0.5, from.y + Float(HEIGHT) * 0.5, from.z + (to.z - from.z) * 0.5)
         
-        // get center point
-        node.position = SCNVector3(from.x + (to.x - from.x) * 0.5,
-                                   from.y + Float(HEIGHT) * 0.5,
-                                   from.z + (to.z - from.z) * 0.5)
-        
-        // orientation of the wall is fairly simple. we only need to orient it around the y axis,
-        // and the angle is calculated with 2d math.. now this calculation does not factor in the position of the
-        // camera, and so if you move the cursor right relative to the starting position the
-        // wall will be oriented away from the camera (in this app the wall material is set as double sided so you will not notice)
-        // - obviously if you want to render something on the walls, this issue will need to be resolved.
         node.eulerAngles = SCNVector3(0,
                                       -atan2(to.x - node.position.x, from.z - node.position.z) - Float.pi * 0.5,
                                       0)
-        //node.castsShadow = false
+        
+        let v = from - to
+//        let p1 = SCNVector3(-v.x, 0, v.z) / sqrt(v.x * v.x + v.y * v.y) * 0.1
+//        let p2 = SCNVector3(v.x, 0, v.z) / sqrt(v.x * v.x + v.y * v.y) * -0.1
+        let p1 = SCNVector3(0, 0, 0.1)
+        let p2 = SCNVector3(0, 0, -0.1)
+        
+        let test1 = createNode1()
+        test1.position =  p1
+        test1.name = "test1"
+        node.addChildNode(test1)
+        
+        let test2 = createNode2()
+        test2.position = p2
+        test2.name = "test2"
+        node.addChildNode(test2)
         
         return node
+    }
+    
+    class private func createNode1() -> SCNNode {
+        let sphere = SCNSphere(radius: 0.01)
+        sphere.firstMaterial?.diffuse.contents = UIColor.blue
+        return SCNNode(geometry: sphere)
+    }
+    
+    class private func createNode2() -> SCNNode {
+        let sphere = SCNSphere(radius: 0.01)
+        sphere.firstMaterial?.diffuse.contents = UIColor.red
+        return SCNNode(geometry: sphere)
     }
 }
 

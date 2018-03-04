@@ -8,22 +8,33 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     
     var trackState = WallTrackState.findFirstPoint
     
-    var wandIsRecharging = false
-    var walls = [(wallNode:SCNNode, wallStartPosition:SCNVector3, wallEndPosition:SCNVector3, wallId:String)]()
-    var ambientLightNode:SCNNode?
-    var carryNode:SCNNode!
-    
     var pictureNode: SCNNode?
     
     var trackPictureMovement = true
     
     @IBOutlet weak var scene: ARSCNView!
     
-    @IBOutlet weak var resetButton: UIButton!
+    @IBOutlet weak var menuButton: UIButton!
+    
+    @IBOutlet weak var trackingSurroundingDescription: UILabel!
+    
+    @IBOutlet weak var finishWallTrackingView: UILabel!
+    
+    @IBOutlet weak var changeImage: UILabel!
+    @IBOutlet weak var screenOverlay: UIView!
+    @IBOutlet weak var screenshot: UILabel!
+    
+    @IBOutlet weak var picturesView: UIView!
+    
+    @IBOutlet weak var picturesViewBottomConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var picturesViewHeightConstraint: NSLayoutConstraint!
     
     let timeInterval = RxTimeInterval(0.016) // 60 FPS
     
     let sessionDelegate = ARSessionRxDelegate()
+    
+    private let pictureMaterial = SCNMaterial()
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -32,10 +43,11 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addTapGestureToSceneView()
+        reactor = assembler.reactorProvider.createArSceneReactor()
+        
         configureLighting()
         
-        reactor = assembler.reactorProvider.createArSceneReactor()
+        picturesViewBottomConstraint.constant = -picturesViewHeightConstraint.constant
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -83,28 +95,45 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .getChange { state in state.isPictureIdle }
             .filter { $0 == false }
         
+        let anchorIsNotDetected = reactor.state
+            .getChange { state in state.isAnchorDetected }
+            .filter { isAnchorDetected in isAnchorDetected == false }
+        
+        let areWallsHidden = reactor.state
+            .getChange { state in state.areWallsHidden }
+            .filter { areWallsHidden in areWallsHidden == true }
+        
+        let areWallsShown = reactor.state
+            .getChange { state in state.areWallsHidden }
+            .filter { areWallsHidden in areWallsHidden == false }
+        
+        let isPictureListShown = reactor.state
+            .getChange { state in state.isPictureListShown }
+            .filter { areWallsHidden in areWallsHidden == true }
+        
+        let isNotPictureListShown = reactor.state
+            .getChange { state in state.isPictureListShown }
+            .filter { areWallsHidden in areWallsHidden == false }
+        
         self.rx.viewWillAppear
             .map { _ in .viewWillAppear }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
-        
-        resetButton.rx.tapGesture().when(.recognized)
-            .map { _ in .resetSessionClicked }
+
+        Observable.just(Void())
+            .map { _ in .viewDidLoad }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        // Reset ar session
-        resetButton.rx.tapGesture().when(.recognized)
-            .subscribe(onNext: { _ in
-                self.pauseSession()
-                self.startSession()
-            })
+        // Open action sheet
+        menuButton.rx.tapGesture().when(.recognized)
+            .withLatestFrom(reactor.state)
+            .flatMapLatest { state in self.showActionSheet(forState: state) }
+            .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
         // Detect anchor and create floor plane
-        reactor.state
-            .getChange { state in state.isAnchorDetected }
-            .filter { isAnchorDetected in isAnchorDetected == false }
+        anchorIsNotDetected
             .flatMapLatest { _ in self.sessionDelegate.didAddNodeSubject.take(1) }
             .flatMap { (_, node, anchor) in self.createFloorPlane(node, anchor) }
             .map { anchorIdentifier in ARSceneReactor.Action.anchorDetected(identifier: anchorIdentifier) }
@@ -124,10 +153,6 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .flatMapLatest{ _ in self.view.rx.tapGesture().when(.recognized).take(1) }
             .withLatestFrom(self.reactor!.state)
             .map { state in state.initialTrackingNode!.clone() }
-//              .map { state in
-//                let node = state.initialTrackingNode!
-//                let newNode = TrackingNode.nodeWithoutWall(position: node.position)
-//            }
             .map { newNode in ARSceneReactor.Action.initialTrackingNodeAnchored(nextTrackingNode: newNode) }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
@@ -146,19 +171,14 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         isTrackingNextNode
             .flatMapLatest { _ in self.view.rx.tapGesture().when(.recognized).takeUntil(isNotTrackingNextNode) }
             .withLatestFrom(self.reactor!.state)
-            .filter { state in state.anchoredWallNodes.count < 5 }
-            .map { state in state.nextTrackingNode!.clone()  }
-//            .map { state in state.nextTrackingNode!.childNode(withName: "end_node", recursively: true)!.clone() }
+            .map { state in state.nextTrackingNode!.childNode(withName: "end_node", recursively: true)!.clone()  }
             .map { node in ARSceneReactor.Action.nextTrackingNodeAnchored(nextTrackingNode: node) }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        isTrackingNextNode
-            .flatMapLatest { _ in self.view.rx.tapGesture().when(.recognized).takeUntil(isNotTrackingNextNode) }
+        finishWallTrackingView.rx.tapGesture().when(.recognized)
             .withLatestFrom(self.reactor!.state)
-            .filter { state in state.anchoredWallNodes.count >= 5 }
             .map { state in state.nextTrackingNode!.clone()  }
-            //            .map { state in state.nextTrackingNode!.childNode(withName: "end_node", recursively: true)!.clone() }
             .map { node in ARSceneReactor.Action.lastTrackingNodeAnchored(lastTrackingNode: node) }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
@@ -171,7 +191,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             }
             .withLatestFrom(self.reactor!.state)
             .observeOn(MainScheduler.asyncInstance)
-            .flatMapLatest { state in self.trackingPictureNode(pictureNode: state.pictureNode) }
+            .flatMapLatest { state in self.trackingPictureNode(pictureNode: state.pictureNode, selectedPicture: state.selectedPicture) }
             .map { node in ARSceneReactor.Action.pictureNodeUpdated(pictureNode: node) }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
@@ -199,47 +219,141 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
                 }
             })
             .disposed(by: self.disposeBag)
+        
+        // Show/Hide initial description label
+        reactor.state.getChange { $0.isAnchorDetected }
+            .subscribe(onNext: { isAnchorDetected in
+                if isAnchorDetected {
+                    UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                        self.trackingSurroundingDescription.alpha = CGFloat(0.0)
+                    }, completion: nil)
+                } else {
+                    UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+                        self.trackingSurroundingDescription.alpha = CGFloat(1.0)
+                    }, completion: nil)
+                }
+            })
+            .disposed(by: self.disposeBag)
+        
+        // Show finish wall tracking button
+        reactor.state.getChange { $0.anchoredWallNodes }
+            .filter { walls in walls.count >= 2 }
+            .withLatestFrom(isTrackingNextNode)
+            .subscribe(onNext: { _ in
+                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                    self.finishWallTrackingView.alpha = CGFloat(1.0)
+                }, completion: nil)
+            })
+            .disposed(by: self.disposeBag)
+        
+        // Hide finish wall tracking button
+        isNotTrackingNextNode
+            .subscribe(onNext: { _ in
+                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                    self.finishWallTrackingView.alpha = CGFloat(0.0)
+                }, completion: nil)
+            })
+            .disposed(by: self.disposeBag)
+        
+        areWallsHidden
+            .subscribe(onNext: { _ in
+                let fadeOutAction = SCNAction.fadeOpacity(to: 0.001, duration: 0.5)
+                let walls = self.scene.scene.rootNode.childNodes(passingTest: { node, _ in node.name == TrackingNode.TRACKING_NODE_NAME })
+                walls.forEach { $0.runAction(fadeOutAction) }
+            })
+            .disposed(by: self.disposeBag)
+        
+        areWallsShown
+            .subscribe(onNext: { _ in
+                let fadeInAction = SCNAction.fadeIn(duration: 0.5)
+                let walls = self.scene.scene.rootNode.childNodes(passingTest: { node, _ in node.name == TrackingNode.TRACKING_NODE_NAME })
+                walls.forEach { $0.runAction(fadeInAction) }
+            })
+            .disposed(by: self.disposeBag)
+        
+        isTrackingPictureNode
+            .subscribe(onNext: { _ in
+                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                    self.changeImage.alpha = CGFloat(1.0)
+                    self.screenshot.alpha = CGFloat(1.0)
+                }, completion: nil)
+            }).disposed(by: self.disposeBag)
+        
+        isNotTrackingPictureNode
+            .subscribe(onNext: { _ in
+                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                    self.changeImage.alpha = CGFloat(0.0)
+                    self.screenshot.alpha = CGFloat(0.0)
+                }, completion: nil)
+            }).disposed(by: self.disposeBag)
+        
+        changeImage.rx.tapGesture().when(.recognized)
+            .map { _ in .showPictureList }
+            .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+        screenshot.rx.tapGesture().when(.recognized)
+            .map { _ in self.scene.snapshot() }
+            .subscribe(onNext: { image in
+                let controller = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+                self.present(controller, animated: true, completion: nil)
+            }).disposed(by: self.disposeBag)
+        
+        screenOverlay.rx.tapGesture().when(.recognized)
+            .map { _ in .hidePictureList }
+            .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+        isPictureListShown
+            .subscribe(onNext: { _ in
+                self.showPicturesView()
+            })
+            .disposed(by: self.disposeBag)
+        
+        isNotPictureListShown
+            .subscribe(onNext: { _ in
+                self.hidePicturesView()
+            })
+            .disposed(by: self.disposeBag)
+        
+        reactor.state.getChange { $0.selectedPicture }
+            .subscribe(onNext: { picture in
+                self.changePictureMaterial(picture: picture)
+            })
+            .disposed(by: self.disposeBag)
     }
     
-    var addedNodes = 0
-    var trackingNode = SCNNode()
-    
-    @objc func didTap(_ sender:UITapGestureRecognizer) {
-    //        let location = sender.location(in: scene)
-        
-//        if addedNodes < 5 {
-//            guard let planeData = anyPlaneFrom(location: self.view.center) else { return }
-//
-//            trackingNode = TrackingNode.node(from: planeData.1,
-//                                                 to: nil)
-//            scene.scene.rootNode.addChildNode(trackingNode)
-//
-//            trackState = .findScondPoint(trackingNode: trackingNode,
-//                                         wallStartPosition: planeData.1,
-//                                         originAnchor: planeData.2)
-//
-//            addedNodes += 1
-//        }
-        
-        trackPictureMovement = !trackPictureMovement
-    }
-    
-    func trackingPictureNode(pictureNode: SCNNode?) -> Observable<SCNNode> {
+    func trackingPictureNode(pictureNode: SCNNode?, selectedPicture: Picture?) -> Observable<SCNNode> {
         return Observable.create { observer in
             if let planeData = self.test(location: self.view.center) {
                 
                 var node = pictureNode
                 if node == nil {
-                    node = PictureNode.node(at: planeData.1, eulerAngles: planeData.2)
+                    node = PictureNode.node(at: planeData.1, eulerAngles: planeData.2, withMaterial: self.pictureMaterial)
                     self.scene.scene.rootNode.addChildNode(node!)
                 }
                 
+//                let distance1 = planeData.0.childNode(withName: "test1", recursively: true)!.worldPosition.distance(vector: self.scene.pointOfView!.worldPosition)
+//                let distance2 = planeData.0.childNode(withName: "test2", recursively: true)!.worldPosition.distance(vector: self.scene.pointOfView!.worldPosition)
+//
+//                print("DISTANCE")
+//                print(planeData.0.childNode(withName: "test1", recursively: true)!.worldPosition)
+//                print(planeData.0.childNode(withName: "test2", recursively: true)!.worldPosition)
+//                print(distance1)
+//                print(distance2)
+//                print(self.scene.pointOfView!.position)
+                
+//                let pos = (distance1 <= distance2) ? Float(0.1) : Float(-0.1)
+//                let newPosition1 = SCNVector3(planeData.1.x, planeData.1.y, planeData.1.z + pos)
+//                let newPosition2 = SCNVector3(planeData.1.x, planeData.1.y, planeData.1.z + pos)
+//                let distanceX1 = newPosition1.distance(vector: self.scene.pointOfView!.worldPosition)
+//                let distanceX2 = newPosition2.distance(vector: self.scene.pointOfView!.worldPosition)
+//                let p = (distanceX1 <= distanceX2) ? newPosition1 : newPosition2
+//
                 let actionMove = SCNAction.move(to: planeData.1, duration: 0.1)
-                let actionRotate = SCNAction.rotateTo(x: CGFloat(planeData.2.x), y: CGFloat(planeData.2.y), z: CGFloat(planeData.2.z), duration: 0.1    )
+                let actionRotate = SCNAction.rotateTo(x: CGFloat(planeData.2.x), y: CGFloat(planeData.2.y), z: CGFloat(planeData.2.z), duration: 0.1)
                 let actionSequence = SCNAction.group([actionMove, actionRotate])
                 node!.runAction(actionSequence)
-                //        pictureNode?.position = planeData.1
-                //        pictureNode?.eulerAngles = planeData.2
                 
                 observer.onNext(node!)
             }
@@ -267,8 +381,8 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         node.addChildNode(planeNode)
         
         planeNode.opacity = 0
-        let fadeIn = SCNAction.fadeIn(duration: 0.5)
-        let fadeOut = SCNAction.fadeOut(duration: 2)
+//        let fadeIn = SCNAction.fadeIn(duration: 0.5)
+//        let fadeOut = SCNAction.fadeOut(duration: 2)
 //        planeNode.runAction(SCNAction.sequence([fadeIn, fadeOut]))
         
         return Observable.just(anchor.identifier)
@@ -312,23 +426,70 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         configuration.planeDetection = .horizontal
         
         scene.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-        
         scene.delegate = sessionDelegate
-        scene.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
     
     private func pauseSession() {
         scene.session.pause()
     }
     
+    private func resetSession() {
+        pauseSession()
+        scene.scene.rootNode.enumerateChildNodes { (node, stop) in
+            node.removeFromParentNode()
+        }
+        startSession()
+    }
+    
+    private func showActionSheet(forState state: ARSceneReactor.State) -> Observable<ARSceneReactor.Action> {
+        return Observable.create { observer in
+            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            if state.isTrackingPicture && state.areWallsHidden {
+                let action = UIAlertAction(title: "Show walls", style: .default) { (action:UIAlertAction) in
+                    observer.onNext(.showWalls)
+                }
+                alertController.addAction(action)
+            }
+            
+            if state.isTrackingPicture && state.areWallsHidden == false {
+                let action = UIAlertAction(title: "Hide walls", style: .default) { (action:UIAlertAction) in
+                    observer.onNext(.hideWalls)
+                }
+                alertController.addAction(action)
+            }
+            
+            let resetAction = UIAlertAction(title: "Reset", style: .default) { (action:UIAlertAction) in
+                self.resetSession()
+                observer.onNext(.resetSessionClicked)
+            }
+            alertController.addAction(resetAction)
+            
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+            alertController.addAction(cancelAction)
+            
+            self.present(alertController, animated: true, completion: nil)
+            
+            return Disposables.create()
+        }
+    }
+    
+    private func changePictureMaterial(picture: Picture?) {
+        if let picture = picture {
+            loadImage(fromUrl: picture.pictureUrl) { image in
+                self.pictureMaterial.diffuse.contents = image
+                self.pictureMaterial.isDoubleSided = true
+            }
+        } else {
+            pictureMaterial.isDoubleSided = true
+            pictureMaterial.diffuse.contents = UIImage(named: "grid-material.png")
+        }
+    }
+    
     private func configureLighting() {
         scene.autoenablesDefaultLighting = true
         scene.automaticallyUpdatesLighting = true
-    }
-    
-    private func addTapGestureToSceneView() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTap))
-        scene.addGestureRecognizer(tapGestureRecognizer)
     }
     
     private func anyPlaneFrom(location: CGPoint, for anchorIdentifier: UUID) -> (SCNNode, SCNVector3, ARPlaneAnchor)? {
@@ -365,9 +526,6 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     private func test(location:CGPoint, usingExtent:Bool = false) -> (SCNNode, SCNVector3, SCNVector3)? {
         let results = scene.hitTest(location)
         
-        print("results")
-        print(results.count)
-        
         if results.count == 0 { return nil }
         
         guard results[0].node.name == Wall.NAME else { return nil }
@@ -376,71 +534,37 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         return (node,results[0].worldCoordinates,  results[0].node.eulerAngles)
     }
     
-    var nodeAdded = false
+    private func showPicturesView() {
+        self.view.layoutIfNeeded()
+        self.picturesViewBottomConstraint.constant = 0
+        self.screenOverlay.alpha = 0.0
+        UIView.animate(withDuration: 0.3    , animations: {
+            self.picturesViewBottomConstraint.constant += 0
+            self.screenOverlay.alpha = 1.0
+            self.view.layoutIfNeeded()
+        })
+    }
     
-    var anchorId = UUID()
+    private func hidePicturesView() {
+        self.view.layoutIfNeeded()
+        self.picturesViewBottomConstraint.constant = 0
+        self.screenOverlay.alpha = 1.0
+        UIView.animate(withDuration: 0.3, animations: {
+            self.picturesViewBottomConstraint.constant -= self.picturesViewHeightConstraint.constant
+            self.screenOverlay.alpha = 0.0
+            self.view.layoutIfNeeded()
+        })
+    }
 }
 
 extension ARSceneViewController: ARSCNViewDelegate {
 
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-
-        
-//        if (nodeAdded) {
-//            return
-//        }
-//
-//        nodeAdded = true
-//
-//        anchorId = anchor.identifier
-//
-//        // 1
-//        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-//
-//        // 2
-//        let width = CGFloat(planeAnchor.extent.x)
-//        let height = CGFloat(planeAnchor.extent.z)
-//        let plane = SCNPlane(width: width, height: height)
-//        plane.cornerRadius = CGFloat(100)
-//
-//        // 3
-//        plane.materials.first?.diffuse.contents = UIImage(named: "grid-material.png")
-//
-//        // 4
-//        let planeNode = SCNNode(geometry: plane)
-//
-//        // 5
-//        let x = CGFloat(planeAnchor.center.x)
-//        let y = CGFloat(planeAnchor.center.y)
-//        let z = CGFloat(planeAnchor.center.z)
-//        planeNode.position = SCNVector3(x,y,z)
-//        planeNode.eulerAngles.x = -.pi / 2
-//        planeNode.scale = SCNVector3(3, 3, 0)
-//
-//        // 6
-//        node.addChildNode(planeNode)
-//
-//        scene.debugOptions = []
-//
-//        planeNode.opacity = 0
-//        let fadeIn = SCNAction.fadeIn(duration: 0.5)
-//        let fadeOut = SCNAction.fadeOut(duration: 2)
-//        planeNode.runAction(SCNAction.sequence([fadeIn, fadeOut]))
-    }
-    
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        if let lightEstimate = scene.session.currentFrame?.lightEstimate,
-            let ambientLight = ambientLightNode?.light {
-            ambientLight.temperature = lightEstimate.ambientColorTemperature
-            ambientLight.intensity = lightEstimate.ambientIntensity
-        }
-        
-        if addedNodes < 5 {
-            //TODO: DO NOT do this for every frame, that is kind of crazy. Do it via a timer!
-//            DispatchQueue.main.async(execute: updateWallTracking)
-        } else if trackPictureMovement {
-//            DispatchQueue.main.async(execute: trackImage)
-        }
+//        if let lightEstimate = scene.session.currentFrame?.lightEstimate,
+//            let ambientLight = ambientLightNode?.light {
+//            ambientLight.temperature = lightEstimate.ambientColorTemperature
+//            ambientLight.intensity = lightEstimate.ambientIntensity
+//        }
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {

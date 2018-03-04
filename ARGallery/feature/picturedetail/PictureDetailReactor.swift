@@ -37,13 +37,21 @@ class PictureDetailReactor: BaseReactor {
 
                 return Observable.merge([dataObservable, popularObservable])
             case let .focusedItemChanged(picture):
-                return self.provider.focusedPictureService
+                let setSelectedPicture = self.provider.selectedPictureService
+                    .setSelectedPicture(picture)
+                    .map { _ in Mutation.ignore }
+                let setFocusedPicture = self.provider.focusedPictureService
                     .setFocusedPicture(picture)
-                    .map { .ignore }
+                    .map { _ in Mutation.ignore }
+                return Observable.merge(setSelectedPicture, setFocusedPicture)
             case let .popularItemChanged(picture):
                 return self.provider.favouritePicturesService
                     .togglePopular(forPicture: picture)
                     .asObservable()
+                    .map { _ in .ignore }
+            case let .arSceneClicked(picture):
+                return self.provider.selectedPictureService
+                    .setSelectedPicture(picture)
                     .map { _ in .ignore }
         }
     }
@@ -70,6 +78,7 @@ extension PictureDetailReactor {
         case initialize
         case focusedItemChanged(picture: Picture)
         case popularItemChanged(picture: Picture)
+        case arSceneClicked(picture: Picture)
     }
     
     enum Mutation {

@@ -16,6 +16,11 @@ func *(vector:SCNVector3, multiplier:SCNFloat) -> SCNVector3 {
     return SCNVector3(vector.x * multiplier, vector.y * multiplier, vector.z * multiplier)
 }
 
+func /(vector:SCNVector3, multiplier:Float) -> SCNVector3 {
+    
+    return SCNVector3(vector.x / multiplier, vector.y / multiplier, vector.z / multiplier)
+}
+
 func +(left:CGPoint, right:CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x,
                    y: left.y + right.y)

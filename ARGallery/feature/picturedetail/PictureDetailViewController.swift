@@ -19,7 +19,7 @@ class PictureDetailViewController: BaseViewController, ReactorKit.View  {
     var rxDataSource: RxCollectionViewSectionedAnimatedDataSource<Section>!
     
     var initialPicture: Picture!
-    
+        
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
