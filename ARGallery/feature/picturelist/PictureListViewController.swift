@@ -339,9 +339,7 @@ extension PictureListViewController {
                         cell.picture.af_setImage(withURL: url)
                     }
                     
-                    cell.picture.rx
-                        .tapGesture()
-                        .when(.recognized)
+                    cell.picture.rx.tapGesture().when(.recognized)
                         .subscribe(onNext: { _ in self.performSegue(withIdentifier: PictureDetailViewController.sequeIdentifier, sender: picture) })
                         .disposed(by: cell.disposeBagCell)
                     

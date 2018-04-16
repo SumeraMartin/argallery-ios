@@ -1,12 +1,11 @@
 import UIKit
 import Alamofire
 
-func loadImage(fromUrl url:String, handler: @escaping (UIImage?) -> Void) {
-    Alamofire.request(url, method: .get).responseImage { response in
-        if let data = response.result.value {
-            handler(data)
-        } else {
-            handler(nil)
+func loadImage(fromUrl imageUrl: String, handler: @escaping (UIImage?) -> Void) {
+    let url = URL(string: imageUrl)!
+    UIImageView().af_setImage(withURL: url) { response in
+        if let image = response.result.value {
+            handler(image)
         }
     }
 }

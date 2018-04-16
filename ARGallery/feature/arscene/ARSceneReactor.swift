@@ -21,15 +21,21 @@ class ARSceneReactor: BaseReactor {
             nextTrackingNode: nil,
             pictureNode: nil,
             anchoredWallNodes: [],
-            selectedPicture: nil
+            selectedPicture: nil,
+            allPictures: []
         )
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch(action) {
             case .viewDidLoad:
-                return self.provider.selectedPictureService.getSelectedPictureObservable()
-                    .map { picture in .setSelectedPicture(picture: picture) }
+                let selectedPictures = self.provider.selectedPictureService.getSelectedPictureObservable()
+                    .map { picture in Mutation.setSelectedPicture(picture: picture) }
+            
+                let allPictures = self.provider.allPicturesCloudService.getLoadingStateWithDataObservable()
+                    .map { loadingState in Mutation.setAllPictures(pictures: loadingState.data) }
+            
+                return Observable.merge(selectedPictures, allPictures)
             case .resetSessionClicked:
                 return Observable.just(.resetSession)
             case .viewWillAppear:
@@ -60,12 +66,17 @@ class ARSceneReactor: BaseReactor {
                 return Observable.just(Mutation.hidePictureList)
             case .showPictureList:
                 return Observable.just(Mutation.showPictureList)
+            case let .selectedPictureChanged(picture):
+                return self.provider.selectedPictureService.setSelectedPicture(picture)
+                    .map { _ in .ignore }
         }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
         var state = state
         switch(mutation) {
+            case .ignore:
+                break
             case .resetSession:
                 state.isAnchorDetected = false
                 state.anchorIdentifier = nil
@@ -132,6 +143,9 @@ class ARSceneReactor: BaseReactor {
             case let .setSelectedPicture(picture):
                 state.selectedPicture = picture
                 break
+            case let .setAllPictures(pictures):
+                state.allPictures = pictures
+                break
         }
         return state
     }
@@ -156,9 +170,11 @@ extension ARSceneReactor {
         case showWalls
         case showPictureList
         case hidePictureList
+        case selectedPictureChanged(picture: Picture)
     }
     
     enum Mutation {
+        case ignore
         case resetSession
         case anchorDetected(identifier: UUID)
         case initialTrackingNodeUpdated(trackingNode: SCNNode)
@@ -174,6 +190,7 @@ extension ARSceneReactor {
         case showPictureList
         case hidePictureList
         case setSelectedPicture(picture: Picture?)
+        case setAllPictures(pictures: [Picture])
     }
     
     struct State {
@@ -190,6 +207,7 @@ extension ARSceneReactor {
         var pictureNode: SCNNode?
         var anchoredWallNodes: [SCNNode]
         var selectedPicture: Picture?
+        var allPictures: [Picture]
     }
 }
 

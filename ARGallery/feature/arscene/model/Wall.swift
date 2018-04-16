@@ -42,21 +42,21 @@ class Wall {
                                       -atan2(to.x - node.position.x, from.z - node.position.z) - Float.pi * 0.5,
                                       0)
         
-        let v = from - to
+//        let v = from - to
 //        let p1 = SCNVector3(-v.x, 0, v.z) / sqrt(v.x * v.x + v.y * v.y) * 0.1
 //        let p2 = SCNVector3(v.x, 0, v.z) / sqrt(v.x * v.x + v.y * v.y) * -0.1
-        let p1 = SCNVector3(0, 0, 0.1)
-        let p2 = SCNVector3(0, 0, -0.1)
+//        let p1 = SCNVector3(0, 0, 0.1)
+//        let p2 = SCNVector3(0, 0, -0.1)
         
-        let test1 = createNode1()
-        test1.position =  p1
-        test1.name = "test1"
-        node.addChildNode(test1)
-        
-        let test2 = createNode2()
-        test2.position = p2
-        test2.name = "test2"
-        node.addChildNode(test2)
+//        let test1 = createNode1()
+//        test1.position =  p1
+//        test1.name = "test1"
+//        node.addChildNode(test1)
+//
+//        let test2 = createNode2()
+//        test2.position = p2
+//        test2.name = "test2"
+//        node.addChildNode(test2)
         
         return node
     }

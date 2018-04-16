@@ -1,9 +1,13 @@
 import ReactorKit
+import RxDataSources
 import RxSwift
 import ARKit
 
 class ARSceneViewController: BaseViewController, ReactorKit.View  {
   
+    typealias PictureSectionType = AnimatableSectionModel<String, PictureThumbnailSectionItem>
+    typealias RxPictureDataSource = RxCollectionViewSectionedAnimatedDataSource<PictureSectionType>
+    
     static let sequeIdentifier = "show_arscene_seque"
     
     var trackState = WallTrackState.findFirstPoint
@@ -12,16 +16,22 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     
     var trackPictureMovement = true
     
+    // MARK: main content views
+    
     @IBOutlet weak var scene: ARSCNView!
     
     @IBOutlet weak var menuButton: UIButton!
+    
+    @IBOutlet weak var closeView: UIImageView!
     
     @IBOutlet weak var trackingSurroundingDescription: UILabel!
     
     @IBOutlet weak var finishWallTrackingView: UILabel!
     
     @IBOutlet weak var changeImage: UILabel!
+    
     @IBOutlet weak var screenOverlay: UIView!
+    
     @IBOutlet weak var screenshot: UILabel!
     
     @IBOutlet weak var picturesView: UIView!
@@ -30,11 +40,21 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     
     @IBOutlet weak var picturesViewHeightConstraint: NSLayoutConstraint!
     
+    // MARK: picture list views
+    
+    @IBOutlet weak var allPicturesCollectionView: UICollectionView!
+    
+    var allPicturesDataSource: RxPictureDataSource!
+    
     let timeInterval = RxTimeInterval(0.016) // 60 FPS
     
     let sessionDelegate = ARSessionRxDelegate()
     
     private let pictureMaterial = SCNMaterial()
+    
+    private var pictureSize = CGSize(width: 1, height: 1)
+    
+    internal let imageThumbnailClick = PublishSubject<Picture>()
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -42,6 +62,9 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        allPicturesDataSource = createAllPicturesDataSource()
+        allPicturesCollectionView.delegate = self
         
         reactor = assembler.reactorProvider.createArSceneReactor()
         
@@ -118,6 +141,22 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         self.rx.viewWillAppear
             .map { _ in .viewWillAppear }
             .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+        closeView.rx.tapGesture().when(.recognized)
+            .subscribe(onNext: { _ in
+                self.dismiss(animated: true)
+            })
+            .disposed(by: self.disposeBag)
+        
+        // Show all pictures in bottom sheet dialog
+        reactor.state.getChange { $0.allPictures }
+            .map { allPictures in allPictures.map { picture in
+                    let item = PictureThumbnailSectionItem.picture(picture:picture)
+                    return AnimatableSectionModel(model: item.identity, items: [item])
+                }
+            }
+            .bind(to: allPicturesCollectionView.rx.items(dataSource: allPicturesDataSource))
             .disposed(by: self.disposeBag)
 
         Observable.just(Void())
@@ -317,21 +356,38 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .disposed(by: self.disposeBag)
         
         reactor.state.getChange { $0.selectedPicture }
-            .subscribe(onNext: { picture in
-                self.changePictureMaterial(picture: picture)
+            .withLatestFrom(reactor.state)
+            .subscribe(onNext: { state in
+                self.changePictureMaterialAndResize(picture: state.selectedPicture)
             })
+            .disposed(by: self.disposeBag)
+        
+        imageThumbnailClick
+            .map { picture in .selectedPictureChanged(picture: picture) }
+            .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
     }
     
     func trackingPictureNode(pictureNode: SCNNode?, selectedPicture: Picture?) -> Observable<SCNNode> {
         return Observable.create { observer in
+            
+            print("SUMERA TRACKING")
+            
+            if let node = pictureNode {
+                PictureNode.resize(node: node, newWidth: self.pictureSize.width, newHeight: self.pictureSize.height)
+            }
+            
             if let planeData = self.test(location: self.view.center) {
+                
+                print("SUMERA TRACKING")
                 
                 var node = pictureNode
                 if node == nil {
                     node = PictureNode.node(at: planeData.1, eulerAngles: planeData.2, withMaterial: self.pictureMaterial)
                     self.scene.scene.rootNode.addChildNode(node!)
                 }
+                
+                
                 
 //                let distance1 = planeData.0.childNode(withName: "test1", recursively: true)!.worldPosition.distance(vector: self.scene.pointOfView!.worldPosition)
 //                let distance2 = planeData.0.childNode(withName: "test2", recursively: true)!.worldPosition.distance(vector: self.scene.pointOfView!.worldPosition)
@@ -351,11 +407,13 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
 //                let p = (distanceX1 <= distanceX2) ? newPosition1 : newPosition2
 //
                 let actionMove = SCNAction.move(to: planeData.1, duration: 0.1)
-                let actionRotate = SCNAction.rotateTo(x: CGFloat(planeData.2.x), y: CGFloat(planeData.2.y), z: CGFloat(planeData.2.z), duration: 0.1)
+                let actionRotate = SCNAction.rotateTo(x: CGFloat(planeData.2.x), y: CGFloat(planeData.2.y), z: CGFloat(planeData.2.z), duration: 0.0001)
                 let actionSequence = SCNAction.group([actionMove, actionRotate])
                 node!.runAction(actionSequence)
                 
                 observer.onNext(node!)
+            } else {
+                print("SUMERA TRACKING NO")
             }
             return Disposables.create()
         }
@@ -475,16 +533,29 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         }
     }
     
-    private func changePictureMaterial(picture: Picture?) {
+    private func changePictureMaterialAndResize(picture: Picture?) {
         if let picture = picture {
             loadImage(fromUrl: picture.pictureUrl) { image in
                 self.pictureMaterial.diffuse.contents = image
                 self.pictureMaterial.isDoubleSided = true
+                self.setPictureSize(image: image!)
             }
         } else {
             pictureMaterial.isDoubleSided = true
             pictureMaterial.diffuse.contents = UIImage(named: "grid-material.png")
         }
+    }
+    
+    private func setPictureSize(image: UIImage) {
+        let height = image.size.height
+        let width = image.size.width
+        
+        let maxSize = CGFloat(1)
+        let scale = (width <= height) ? maxSize / height : maxSize / width
+        let newWidth = width * scale
+        let newHeight = height * scale
+        
+        self.pictureSize = CGSize(width: newWidth, height: newHeight)
     }
     
     private func configureLighting() {
@@ -524,14 +595,12 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     }
     
     private func test(location:CGPoint, usingExtent:Bool = false) -> (SCNNode, SCNVector3, SCNVector3)? {
-        let results = scene.hitTest(location)
+        let results = scene.hitTest(location, options: [SCNHitTestOption.searchMode: 1])
+        let wallResult = results.first { $0.node.name == Wall.NAME }
+        guard wallResult != nil else { return nil }
         
-        if results.count == 0 { return nil }
-        
-        guard results[0].node.name == Wall.NAME else { return nil }
-        
-        let node = results[0].node
-        return (node,results[0].worldCoordinates,  results[0].node.eulerAngles)
+        let node = wallResult!.node
+        return (node, wallResult!.worldCoordinates, node.eulerAngles)
     }
     
     private func showPicturesView() {
@@ -585,5 +654,28 @@ extension ARSceneViewController: ARSCNViewDelegate {
         let y = CGFloat(planeAnchor.center.y)
         let z = CGFloat(planeAnchor.center.z)
         planeNode.position = SCNVector3(x, y, z)
+    }
+}
+
+extension ARSceneViewController {
+    func createAllPicturesDataSource() -> RxPictureDataSource {
+        return RxPictureDataSource(configureCell: { dataSource, tableView, indexPath, _ in
+            switch(dataSource[indexPath]) {
+                case .picture(let picture):
+                    let cell = self.allPicturesCollectionView.dequeueReusableCell(withReuseIdentifier: PicureThumbnailCell.identifier, for: indexPath) as! PicureThumbnailCell
+                    cell.bind(picture, onClick: { picture in
+                        self.imageThumbnailClick.onNext(picture)
+                    })
+                    return cell
+            }
+        }, configureSupplementaryView: { (dataSource, collectionView, kind, indexPath) in
+            return collectionView.getDummyReusableCell(ofKind: kind, forIndex: indexPath)
+        })
+    }
+}
+
+extension ARSceneViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 150, height: collectionView.frame.height)
     }
 }
