@@ -183,10 +183,16 @@ extension PictureDetailViewController: ARIconTapDelegate {
 extension PictureDetailViewController: PictureDetailCellDelegate {
     func pictureIsZoomed() {
         picturesCollectionView.isScrollEnabled = false
+        UIView.animate(withDuration: 0.5, delay: 0, options: [], animations: {
+            self.backButton.alpha = 0
+        })
     }
     
     func pictureIsUnzoomed() {
         picturesCollectionView.isScrollEnabled = true
+        UIView.animate(withDuration: 0.5, delay: 0, options: [], animations: {
+            self.backButton.alpha = 1
+        })
     }
     
     func descriptionIsShown() {

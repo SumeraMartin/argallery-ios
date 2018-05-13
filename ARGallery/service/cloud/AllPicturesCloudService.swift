@@ -7,7 +7,7 @@ class AllPicturesCloudService: BaseService, PictureDataSourceServiceType {
     
     var dataSource = DataSourceType.all
     
-    private static let limit = 1
+    private static let limit = 30
     
     private let startLoadingSubject = PublishSubject<ReloadData>()
     
@@ -45,7 +45,7 @@ class AllPicturesCloudService: BaseService, PictureDataSourceServiceType {
     }
     
     func wasSelected() {
-        // DO nothing
+        // Do nothing
     }
     
     func buildQuery(_ query: Query) -> Query {
@@ -78,7 +78,7 @@ class AllPicturesCloudService: BaseService, PictureDataSourceServiceType {
         return provider.kenticoClientService.getClient()
             .flatMapLatest { client -> Observable<Result<[CloudPicture]>> in
                 let limit = AllPicturesCloudService.limit
-                let offset = loadingStateWithPictures.data.count + 1
+                let offset = loadingStateWithPictures.data.count
                 return self.fetchData(offset: offset, limit: limit, client: client)
             }
             .map { result in result.map { pictures in pictures.map { $0.toPicture() } } }
@@ -93,7 +93,6 @@ class AllPicturesCloudService: BaseService, PictureDataSourceServiceType {
                         return LoadingStateWithPictures(dataSource: self.dataSource, loadingState: .error, data: loadingStateWithPictures.data)
                 }
             }
-//            .delay(RxTimeInterval(5), scheduler: MainScheduler.instance)
     }
     
     private func fetchData(offset: Int, limit: Int, client: DeliveryClient) -> Observable<Result<[CloudPicture]>> {

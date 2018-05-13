@@ -21,26 +21,30 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
     @IBOutlet weak var scene: ARSCNView!
     
     @IBOutlet weak var menuButton: UIButton!
-    
-    @IBOutlet weak var closeView: UIImageView!
+
+    @IBOutlet weak var closeButton: UIButton!
     
     @IBOutlet weak var trackingSurroundingDescription: UILabel!
     
-    @IBOutlet weak var finishWallTrackingView: UILabel!
+    @IBOutlet weak var addWallDescription: UILabel!
     
-    @IBOutlet weak var changeImage: UILabel!
+    @IBOutlet weak var wallTrackingCompletedButton: UIButton!
+    
+    @IBOutlet weak var changePictureView: UIImageView!
     
     @IBOutlet weak var screenOverlay: UIView!
     
-    @IBOutlet weak var screenshot: UILabel!
+    @IBOutlet weak var screenshotView: UIImageView!
+    
+    @IBOutlet weak var anchorPictureButton: UIButton!
+    
+    @IBOutlet weak var releasePictureButton: UIButton!
     
     @IBOutlet weak var picturesView: UIView!
     
     @IBOutlet weak var picturesViewBottomConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var picturesViewHeightConstraint: NSLayoutConstraint!
-    
-    // MARK: picture list views
     
     @IBOutlet weak var allPicturesCollectionView: UICollectionView!
     
@@ -143,7 +147,8 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        closeView.rx.tapGesture().when(.recognized)
+        // Close view controller
+        closeButton.rx.tapGesture().when(.recognized)
             .subscribe(onNext: { _ in
                 self.dismiss(animated: true)
             })
@@ -159,6 +164,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: allPicturesCollectionView.rx.items(dataSource: allPicturesDataSource))
             .disposed(by: self.disposeBag)
 
+        // Send viewDidLoad action to reactor
         Observable.just(Void())
             .map { _ in .viewDidLoad }
             .bind(to: reactor.action)
@@ -179,6 +185,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Perform tracking of initial wall node
         isTrackingFirstNode
             .flatMap { _ in Observable<Int>.interval(self.timeInterval, scheduler: MainScheduler.instance).takeUntil(isNotTrackingFirstNode) }
             .observeOn(MainScheduler.asyncInstance)
@@ -188,6 +195,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Anchor initial wall node
         isTrackingFirstNode
             .flatMapLatest{ _ in self.view.rx.tapGesture().when(.recognized).take(1) }
             .withLatestFrom(self.reactor!.state)
@@ -196,6 +204,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Perform tracking of another wall node
         isTrackingNextNode
             .flatMap { _ in Observable<Int>.interval(self.timeInterval, scheduler: MainScheduler.instance).takeUntil(isNotTrackingNextNode) }
             .observeOn(MainScheduler.asyncInstance)
@@ -207,6 +216,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Anchor another wall node
         isTrackingNextNode
             .flatMapLatest { _ in self.view.rx.tapGesture().when(.recognized).takeUntil(isNotTrackingNextNode) }
             .withLatestFrom(self.reactor!.state)
@@ -215,13 +225,15 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        finishWallTrackingView.rx.tapGesture().when(.recognized)
+        // Finish anchoring of wall nodes
+        wallTrackingCompletedButton.rx.tapGesture().when(.recognized)
             .withLatestFrom(self.reactor!.state)
             .map { state in state.nextTrackingNode!.clone()  }
             .map { node in ARSceneReactor.Action.lastTrackingNodeAnchored(lastTrackingNode: node) }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Move picture node across the walls
         isTrackingPictureNode
             .flatMapLatest { _ in isNotPictureNodeIdle }
             .flatMapLatest { _ in Observable<Int>.interval(self.timeInterval, scheduler: MainScheduler.instance)
@@ -235,17 +247,49 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Anchor picture
         isTrackingPictureNode
             .flatMapLatest { _ in isNotPictureNodeIdle }
-            .flatMapLatest { _ in self.view.rx.tapGesture().when(.recognized).take(1) }
+            .flatMapLatest { _ in self.releasePictureButton.rx.tapGesture().when(.recognized).take(1) }
             .map { node in ARSceneReactor.Action.pausePictureNodeTracking }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Release picture
         isPictureNodeIdle
-            .flatMapLatest{ _ in self.view.rx.tapGesture().when(.recognized).take(1) }
+            .flatMapLatest{ _ in self.anchorPictureButton.rx.tapGesture().when(.recognized).take(1) }
             .map { node in ARSceneReactor.Action.resumePictureNodeTracking }
             .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+         // Show/Hide anchor picture button
+         reactor.state.map { state in state.isTrackingPicture && state.isPictureIdle }
+            .subscribe(onNext: { isTrackingAndAnchored in
+                if isTrackingAndAnchored {
+                    UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                        self.anchorPictureButton.alpha = CGFloat(1.0)
+                    }, completion: nil)
+                } else {
+                    UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                        self.anchorPictureButton.alpha = CGFloat(0.0)
+                    }, completion: nil)
+                }
+            })
+            .disposed(by: self.disposeBag)
+        
+        // Show/Hide release picture button
+        reactor.state.map { state in state.isTrackingPicture && !state.isPictureIdle }
+            .subscribe(onNext: { isTrackingAndReleased in
+                if isTrackingAndReleased {
+                    UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                        self.releasePictureButton.alpha = CGFloat(1.0)
+                    }, completion: nil)
+                } else {
+                    UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                        self.releasePictureButton.alpha = CGFloat(0.0)
+                    }, completion: nil)
+                }
+            })
             .disposed(by: self.disposeBag)
         
         // Show/Hide featured points
@@ -280,7 +324,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             .withLatestFrom(isTrackingNextNode)
             .subscribe(onNext: { _ in
                 UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
-                    self.finishWallTrackingView.alpha = CGFloat(1.0)
+                    self.wallTrackingCompletedButton.alpha = CGFloat(1.0)
                 }, completion: nil)
             })
             .disposed(by: self.disposeBag)
@@ -289,11 +333,12 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         isNotTrackingNextNode
             .subscribe(onNext: { _ in
                 UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
-                    self.finishWallTrackingView.alpha = CGFloat(0.0)
+                    self.wallTrackingCompletedButton.alpha = CGFloat(0.0)
                 }, completion: nil)
             })
             .disposed(by: self.disposeBag)
         
+        // Hide walls
         areWallsHidden
             .subscribe(onNext: { _ in
                 let fadeOutAction = SCNAction.fadeOpacity(to: 0.001, duration: 0.5)
@@ -302,6 +347,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             })
             .disposed(by: self.disposeBag)
         
+        // Show walls
         areWallsShown
             .subscribe(onNext: { _ in
                 let fadeInAction = SCNAction.fadeIn(duration: 0.5)
@@ -310,51 +356,55 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             })
             .disposed(by: self.disposeBag)
         
+        // Show picture
         isTrackingPictureNode
             .subscribe(onNext: { _ in
-                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
-                    self.changeImage.alpha = CGFloat(1.0)
-                    self.screenshot.alpha = CGFloat(1.0)
-                }, completion: nil)
+                self.changePictureView.alpha = CGFloat(1.0)
+                self.screenshotView.alpha = CGFloat(1.0)
             }).disposed(by: self.disposeBag)
         
+        // Hide picture
         isNotTrackingPictureNode
             .subscribe(onNext: { _ in
-                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: {
-                    self.changeImage.alpha = CGFloat(0.0)
-                    self.screenshot.alpha = CGFloat(0.0)
-                }, completion: nil)
+                self.changePictureView.alpha = CGFloat(0.0)
+                self.screenshotView.alpha = CGFloat(0.0)
             }).disposed(by: self.disposeBag)
         
-        changeImage.rx.tapGesture().when(.recognized)
+        // Send showPictureList action to reactor
+        changePictureView.rx.tapGesture().when(.recognized)
             .map { _ in .showPictureList }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        screenshot.rx.tapGesture().when(.recognized)
+        // Take and share screenshot
+        screenshotView.rx.tapGesture().when(.recognized)
             .map { _ in self.scene.snapshot() }
             .subscribe(onNext: { image in
                 let controller = UIActivityViewController(activityItems: [image], applicationActivities: nil)
                 self.present(controller, animated: true, completion: nil)
             }).disposed(by: self.disposeBag)
         
+        // Send hidePictureList action to reactor
         screenOverlay.rx.tapGesture().when(.recognized)
             .map { _ in .hidePictureList }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Show list of pictures
         isPictureListShown
             .subscribe(onNext: { _ in
                 self.showPicturesView()
             })
             .disposed(by: self.disposeBag)
         
+        // Hide list of pictures
         isNotPictureListShown
             .subscribe(onNext: { _ in
                 self.hidePicturesView()
             })
             .disposed(by: self.disposeBag)
         
+        // Update picture when is changed
         reactor.state.getChange { $0.selectedPicture }
             .withLatestFrom(reactor.state)
             .subscribe(onNext: { state in
@@ -362,58 +412,49 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
             })
             .disposed(by: self.disposeBag)
         
+        // Send action that will change the selected picture
         imageThumbnailClick
             .map { picture in .selectedPictureChanged(picture: picture) }
             .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+        // Show add wall description
+        isTrackingFirstNode
+            .subscribe(onNext: { _ in
+                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+                    self.addWallDescription.alpha = CGFloat(1.0)
+                }, completion: nil)
+            })
+            .disposed(by: self.disposeBag)
+        
+        // Hide add wall description
+        isNotTrackingFirstNode
+            .subscribe(onNext: { _ in
+                UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+                    self.addWallDescription.alpha = CGFloat(0.0)
+                }, completion: nil)
+            })
             .disposed(by: self.disposeBag)
     }
     
     func trackingPictureNode(pictureNode: SCNNode?, selectedPicture: Picture?) -> Observable<SCNNode> {
         return Observable.create { observer in
-            
-            print("SUMERA TRACKING")
-            
             if let node = pictureNode {
                 PictureNode.resize(node: node, newWidth: self.pictureSize.width, newHeight: self.pictureSize.height)
             }
             
             if let planeData = self.test(location: self.view.center) {
-                
-                print("SUMERA TRACKING")
-                
                 var node = pictureNode
                 if node == nil {
                     node = PictureNode.node(at: planeData.1, eulerAngles: planeData.2, withMaterial: self.pictureMaterial)
                     self.scene.scene.rootNode.addChildNode(node!)
                 }
-                
-                
-                
-//                let distance1 = planeData.0.childNode(withName: "test1", recursively: true)!.worldPosition.distance(vector: self.scene.pointOfView!.worldPosition)
-//                let distance2 = planeData.0.childNode(withName: "test2", recursively: true)!.worldPosition.distance(vector: self.scene.pointOfView!.worldPosition)
-//
-//                print("DISTANCE")
-//                print(planeData.0.childNode(withName: "test1", recursively: true)!.worldPosition)
-//                print(planeData.0.childNode(withName: "test2", recursively: true)!.worldPosition)
-//                print(distance1)
-//                print(distance2)
-//                print(self.scene.pointOfView!.position)
-                
-//                let pos = (distance1 <= distance2) ? Float(0.1) : Float(-0.1)
-//                let newPosition1 = SCNVector3(planeData.1.x, planeData.1.y, planeData.1.z + pos)
-//                let newPosition2 = SCNVector3(planeData.1.x, planeData.1.y, planeData.1.z + pos)
-//                let distanceX1 = newPosition1.distance(vector: self.scene.pointOfView!.worldPosition)
-//                let distanceX2 = newPosition2.distance(vector: self.scene.pointOfView!.worldPosition)
-//                let p = (distanceX1 <= distanceX2) ? newPosition1 : newPosition2
-//
                 let actionMove = SCNAction.move(to: planeData.1, duration: 0.1)
                 let actionRotate = SCNAction.rotateTo(x: CGFloat(planeData.2.x), y: CGFloat(planeData.2.y), z: CGFloat(planeData.2.z), duration: 0.0001)
                 let actionSequence = SCNAction.group([actionMove, actionRotate])
                 node!.runAction(actionSequence)
                 
                 observer.onNext(node!)
-            } else {
-                print("SUMERA TRACKING NO")
             }
             return Disposables.create()
         }
@@ -437,11 +478,7 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
         planeNode.scale = SCNVector3(3, 3, 0)
         
         node.addChildNode(planeNode)
-        
         planeNode.opacity = 0
-//        let fadeIn = SCNAction.fadeIn(duration: 0.5)
-//        let fadeOut = SCNAction.fadeOut(duration: 2)
-//        planeNode.runAction(SCNAction.sequence([fadeIn, fadeOut]))
         
         return Observable.just(anchor.identifier)
     }
@@ -628,28 +665,17 @@ class ARSceneViewController: BaseViewController, ReactorKit.View  {
 
 extension ARSceneViewController: ARSCNViewDelegate {
 
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-//        if let lightEstimate = scene.session.currentFrame?.lightEstimate,
-//            let ambientLight = ambientLightNode?.light {
-//            ambientLight.temperature = lightEstimate.ambientColorTemperature
-//            ambientLight.intensity = lightEstimate.ambientIntensity
-//        }
-    }
-    
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        // 1
         guard let planeAnchor = anchor as?  ARPlaneAnchor,
             let planeNode = node.childNodes.first,
             let plane = planeNode.geometry as? SCNPlane
             else { return }
 
-        // 2
         let width = CGFloat(planeAnchor.extent.x)
         let height = CGFloat(planeAnchor.extent.z)
         plane.width = width
         plane.height = height
 
-        // 3
         let x = CGFloat(planeAnchor.center.x)
         let y = CGFloat(planeAnchor.center.y)
         let z = CGFloat(planeAnchor.center.z)

@@ -28,10 +28,6 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
     
     @IBOutlet weak var secondCategoryContainer: UIStackView!
     
-    @IBOutlet weak var thirdCategoryCheckbox: BEMCheckBox!
-    
-    @IBOutlet weak var thirdCategoryContainer: UIStackView!
-    
     @IBOutlet weak var closeButton: UIBarButtonItem!
     
     @IBOutlet weak var resetButton: UIBarButtonItem!
@@ -77,50 +73,52 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
     }
     
     func bind(reactor: FilterReactor) {
+        // Price range changed
         priceRangeSubject
             .debounce(RxTimeInterval(0.2), scheduler: MainScheduler.instance)
             .map { .priceRangeChanged(minPrice: $0.minPrice, maxPrice: $0.maxPrice) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        // Year range changed
         yearRangeSubject
             .debounce(RxTimeInterval(0.2), scheduler: MainScheduler.instance)
             .map { .yearRangeChanged(minYear: $0.minYear, maxYear: $0.maxYear) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        // Close button was clicked
         closeButton.rx.tap
             .subscribe(onNext: { self.dismiss(animated: true, completion: nil) })
             .disposed(by: disposeBag)
         
+        // Reset button was clicked
         resetButton.rx.tap
             .map { .reset }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        // first category was changed
         firstCategoryContainer.rx.tapGesture()
             .when(.recognized)
             .map { _ in .firstCategoryChanged }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        // Second category was changed
         secondCategoryContainer.rx.tapGesture()
             .when(.recognized)
             .map { _ in .secondCategoryChanged }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        thirdCategoryContainer.rx.tapGesture()
-            .when(.recognized)
-            .map { _ in .thirdCategoryChanged }
-            .bind(to: reactor.action)
-            .disposed(by: disposeBag)
-        
+        // Notify reactor about viewWillDissappear event
         self.rx.viewWillDisappear
             .map { _ in .viewWillDissappear }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        // Set ranges once
         reactor.state
             .take(1)
             .map { $0.defaultFilter }
@@ -132,6 +130,7 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
             })
             .disposed(by: disposeBag)
         
+        // Change filter values if it will change
         reactor.state
             .getChange { state in state.currentFilter }
             .subscribe(onNext: { filter in
@@ -152,9 +151,6 @@ class FilterViewController: BaseViewController, ReactorKit.View  {
                 }
                 if self.secondCategoryCheckbox.on != filter.secondCategoryEnabled {
                     self.secondCategoryCheckbox.setOn(filter.secondCategoryEnabled, animated: true)
-                }
-                if self.thirdCategoryCheckbox.on != filter.thirdCategoryEnabled {
-                    self.thirdCategoryCheckbox.setOn(filter.thirdCategoryEnabled, animated: true)
                 }
             })
             .disposed(by: disposeBag)

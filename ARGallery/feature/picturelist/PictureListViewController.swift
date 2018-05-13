@@ -21,9 +21,9 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
         
     @IBOutlet weak var segmentedDataSource: UISegmentedControl!
     
-    @IBOutlet weak var filterIcon: UIBarButtonItem!
-    
     @IBOutlet weak var emptyStateView: UIView!
+    
+    @IBOutlet weak var filterIcon: UIBarButtonItem!
     
     let scrollSpeedEvaluator = ScrollSpeedEvaluator()
     
@@ -32,8 +32,6 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
     let focusedItemEvaluator = FocusedItemEvaluator()
     
     let pictureFocusedSubject = PublishSubject<Picture>()
-    
-    var refresher: UIRefreshControl!
     
     var pictureDataSource: RxPictureDataSource!
     
@@ -47,9 +45,6 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        refresher = UIRefreshControl()
-        refresher.tintColor = UIColor.blue
         
         pictureDataSource = createPictureDataSource()
         pictureInfoDataSource = createPictureInfoDataSource()
@@ -77,9 +72,17 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             .filter { $0.focusedPicture != nil }
             .getChange { $0.focusedPicture! }
         
+        let isFilterDataSource = reactor.state
+            .map { $0.dataSource == DataSourceType.filtered }
+            .getChange { $0 }
+        
         let dataErrorLoadingObservable =
             Observable.combineLatest(dataObservable, errorObservable, loadingObservable) { ($0, $1, $2) }
         
+        let scroll = imageCollectionView.rx.didScroll.map { _ in Void() }
+        
+        let interval = Observable<Int>.interval(RxTimeInterval(0.2), scheduler: MainScheduler.instance).map { _ in Void() }
+    
         // Change loading, error and data state of pictures collectionview
         dataErrorLoadingObservable
             .map { dataErrorLoading in
@@ -112,25 +115,21 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
+        // Transform cells
         imageCollectionView.rx.didEndDisplayingCell
             .subscribe(onNext: { index in
                 self.transformCellsByDistanceFromCenter()
             })
             .disposed(by: self.disposeBag)
         
-        imageCollectionView.rx.didEndDisplayingCell
-            .take(1)
-            .subscribe(onNext: { index in
-//                self.snapToFocusedItem()
-            })
-            .disposed(by: self.disposeBag)
-        
+        // Trancform cells when collection view scroll
         imageCollectionView.rx.didScroll
             .subscribe(onNext: { index in
                 self.transformCellsByDistanceFromCenter()
             })
             .disposed(by: self.disposeBag)
         
+        // Snap to focused item when drag ends
         imageCollectionView.rx.didEndDragging
             .filter { _ in !self.imageCollectionView.isDecelerating }
             .subscribe(onNext: { _ in
@@ -138,12 +137,14 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
+        // Snap to focused item when collection view stops scrolling
         imageCollectionView.rx.didEndDecelerating
             .subscribe(onNext: { _ in
                 self.snapToFocusedItem()
             })
             .disposed(by: self.disposeBag)
         
+        // Snap to focused item when error or loading state are changed and collection view is not scrolling or is not being dragged
         dataErrorLoadingObservable
             .flatMapLatest { _ in Observable<Int>.timer(RxTimeInterval(0.2), scheduler: MainScheduler.instance) }
             .filter { _ in !self.imageCollectionView.isDragging && !self.imageCollectionView.isDecelerating }
@@ -152,10 +153,8 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
-        let scroll = imageCollectionView.rx.didScroll.map { _ in Void() }
-        let interval = Observable<Int>.interval(RxTimeInterval(0.2), scheduler: MainScheduler.instance).map { _ in Void() }
-        
-        Observable.merge(scroll) //interval)
+        // Change focused item when collection view is scrolled
+        Observable.merge(scroll)
             .withLatestFrom(reactor.state)
             .subscribe(onNext: { state in
                 if let focusedItemSection = self.focusedItemEvaluator.getFocusedItemSection(self.imageCollectionView) {
@@ -170,23 +169,25 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
                 }
             })
             .disposed(by: self.disposeBag)
-                
+        
+        // Transform cells when they are scrolled or in given interval
         Observable.merge(scroll, interval)
             .subscribe(onNext: { _ in
                 self.transformCellsByDistanceFromCenter()
             })
             .disposed(by: self.disposeBag)
         
+        // Transform cells when they are not being dragged
         Observable.merge(rx.viewWillAppear, rx.viewDidAppear)
             .flatMapLatest { _ in scroll.takeUntil(self.rx.viewWillDisappear) }
             .flatMapLatest { Observable<Int>.interval(RxTimeInterval(0.5), scheduler: MainScheduler.instance) }
             .filter { _ in !self.imageCollectionView.isDragging }
             .subscribe(onNext: { _ in
-//                self.snapToFocusedItem()
                 self.transformCellsByDistanceFromCenter()
             })
             .disposed(by: self.disposeBag)
         
+        // Snap to focused item and transform cells when viewDidAppear is called
         rx.viewDidAppear
             .subscribe(onNext: { _ in
                 self.snapToFocusedItem()
@@ -194,6 +195,7 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
+        // Scroll to selected item when it is changed
         focusedPictureObservable
             .withLatestFrom(reactor.state.map { $0.data }) { picture, data in self.getIndex(data, picture) }
             .map { self.addOffsetToPicturesIndex($0) }
@@ -203,6 +205,7 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
+        // Scroll to picture info section when focused item is changed
         Observable.merge(pictureFocusedSubject.distinctUntilChanged(), focusedPictureObservable)
             .distinctUntilChanged()
             .withLatestFrom(reactor.state) { picture, state -> IndexPath? in
@@ -218,17 +221,14 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
+        // Show filter view controller when filter icon is clicked
         filterIcon.rx.tap
             .subscribe(onNext: { _ in
                 self.performSegue(withIdentifier: FilterViewController.sequeIdentifier, sender: nil)
             })
             .disposed(by: self.disposeBag)
         
-        refresher.rx.controlEvent(.valueChanged)
-            .map { .refresh }
-            .bind(to: reactor.action)
-            .disposed(by: self.disposeBag)
-        
+        // Send load more action if is last cell shown
         imageCollectionView.rx.willDisplayCell
             .map { _, indexPath in indexPath }
             .filter { index in
@@ -240,36 +240,55 @@ class PictureListViewController: BaseViewController, ReactorKit.View {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Send allDataSelected action when segment control button is clicked
         segmentedDataSource.rx.selectedSegmentIndex.asObservable()
             .filter { $0 == 0 }
             .map { _ in PictureListReactor.Action.allDataSelected }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Send favouriteDataSelected action when segment control button is clicked
         segmentedDataSource.rx.selectedSegmentIndex.asObservable()
             .filter { $0 == 1 }
             .map { _ in PictureListReactor.Action.favouriteDataSelected }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Send filteredDataSelected action when segment control button is clicked
         segmentedDataSource.rx.selectedSegmentIndex.asObservable()
             .filter { $0 == 2 }
             .map { _ in PictureListReactor.Action.filteredDataSelected }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Send initialize action when viewWillAppear is clicked
         rx.viewWillAppear
             .take(1)
             .map { _ in .initialize }
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
+        // Transform cells size after viewDidAppear is called
         rx.viewDidAppear
             .delay(RxTimeInterval(1), scheduler: MainScheduler.instance)
             .subscribe(onNext: { _ in
                 self.transformCellsByDistanceFromCenter()
             })
             .disposed(by: self.disposeBag)
+        
+        // Show/Hide filter button
+        isFilterDataSource
+            .subscribe(onNext: { isFilter in
+                if isFilter {
+                    self.filterIcon.isEnabled = true
+                    self.filterIcon.tintColor = UIColor.white
+                } else {
+                    self.filterIcon.isEnabled = false
+                    self.filterIcon.tintColor = UIColor.clear
+                }
+            })
+            .disposed(by: self.disposeBag)
+        
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -411,38 +430,6 @@ extension PictureListViewController: UICollectionViewDelegateFlowLayout {
 }
 
 extension PictureListViewController: UIScrollViewDelegate {
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        if scrollView == imageCollectionView {
-//
-//            transformCellsByDistanceFromCenter()
-//
-//            if scrollSpeedEvaluator.isScrollingSlowly(scrollView) || true {
-//                if let focusedItemSection = focusedItemEvaluator.getFocusedItemSection(imageCollectionView) {
-//                    let index = IndexPath(row: 0, section: focusedItemSection)
-//                    let item = pictureDataSource[index]
-//                    switch item {
-//                        case let .DataItem(picture):
-//                            pictureFocusedSubject.onNext(picture)
-//                        default:
-//                            break
-//                    }
-//                }
-//            }
-//        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView == imageCollectionView {
-//             snapToFocusedItem()
-        }
-    }
-    
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if scrollView == imageCollectionView  && !decelerate {
-//            snapToFocusedItem()
-        }
-    }
     
     func transformCellsByDistanceFromCenter() {
         collectionViewTransformer.transformByDistanceFromCenter(in: imageCollectionView)

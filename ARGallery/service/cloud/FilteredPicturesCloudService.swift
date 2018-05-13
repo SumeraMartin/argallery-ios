@@ -13,7 +13,9 @@ class FilteredPicturesCloudService : AllPicturesCloudService {
         return query
             .add(key: "elements.price[gte]", value: filter.minPrice)
             .add(key: "elements.price[lte]", value: filter.maxPrice)
-//            .add(key: "system.id[in]", value: "f99e2d6f-f6a4-4cc9-8ecd-02e10f1501c9")
+            .add(key: "elements.year[gte]", value: filter.minYear)
+            .add(key: "elements.year[lte]", value: filter.maxYear)
+            .add(key: "elements.categories[any]", value: createCategoriesArray(filter: filter))
     }
     
     private func subscribeToFitlerChanges() {
@@ -22,5 +24,16 @@ class FilteredPicturesCloudService : AllPicturesCloudService {
             .do(onNext: { _ in self.reload() })
             .subscribe()
             .disposed(by: disposeBag)
+    }
+    
+    private func createCategoriesArray(filter: Filter) -> String {
+        var array: [String] = []
+        if filter.firstCategoryEnabled {
+            array.append("is_animal_picture")
+        }
+        if filter.secondCategoryEnabled {
+            array.append("is_nature_picture")
+        }
+        return array.joined(separator: ",")
     }
 }

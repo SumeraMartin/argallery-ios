@@ -14,6 +14,8 @@ struct Picture {
     
     let price: Double
     
+    let year: Double
+    
     var url: URL? {
         get { return URL(string: pictureUrl) }
     }

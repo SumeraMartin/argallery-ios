@@ -14,6 +14,8 @@ class PopularPicture: Object {
     
     @objc dynamic var price: Double = 0
     
+    @objc dynamic var year: Double = 0
+    
     override static func primaryKey() -> String? {
         return "id"
     }

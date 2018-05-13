@@ -18,4 +18,5 @@ class FocusedPictureService: BaseService, FocusedPictureServiceType {
     
     func getFocusedPictureObservable() -> Observable<Picture?> {
         return focusedPictureSubject.asObservable()
+    }
 }

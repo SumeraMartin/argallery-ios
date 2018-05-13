@@ -22,8 +22,6 @@ class TransitionAnimator: NSObject {
         case dismissing
     }
     
-    // MARK: - Properties
-    
     fileprivate var transitionMode: TransitionMode = .presenting
     fileprivate let defaultDuration: TimeInterval = 0.2
 }

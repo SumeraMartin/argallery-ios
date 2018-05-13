@@ -7,7 +7,8 @@ extension CloudPicture  {
             author: author,
             pictureUrl: pictureUrl,
             description: description,
-            price: price
+            price: price,
+            year: year
         )
     }
 }

@@ -44,6 +44,7 @@
 		5B8C5D5D2041D1A7003D7D22 /* PictureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D5C2041D1A7003D7D22 /* PictureNode.swift */; };
 		5B8C5D632042DC5F003D7D22 /* grid-material.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B8C5D622042DC5F003D7D22 /* grid-material.png */; };
 		5B8C5D6520431575003D7D22 /* ARSessionRxDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C5D6420431575003D7D22 /* ARSessionRxDelegate.swift */; };
+		5B955473209335A900962877 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B424CE1201BADD800BF1CD9 /* Assets.xcassets */; };
 		5B957D5E202EF65700B8B61F /* TransitionAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5D202EF65700B8B61F /* TransitionAnimations.swift */; };
 		5B957D60202EF68900B8B61F /* TransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D5F202EF68900B8B61F /* TransitionAnimator.swift */; };
 		5B957D63202F63FE00B8B61F /* ARSceneReactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B957D62202F63FE00B8B61F /* ARSceneReactor.swift */; };
@@ -100,7 +101,7 @@
 		5B3B9DE320210B7400FE629D /* BottomSheetSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetSectionItem.swift; sourceTree = "<group>"; };
 		5B3B9DE520210FDA00FE629D /* TableViewWithTransparentHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewWithTransparentHeader.swift; sourceTree = "<group>"; };
 		5B3D2838200FF51200143733 /* CloudPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPicture.swift; sourceTree = "<group>"; };
-		5B424CE1201BADD800BF1CD9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = /Users/martin/Documents/Projects/argallery/ARGallery/ARGallery/Assets.xcassets; sourceTree = "<absolute>"; };
+		5B424CE1201BADD800BF1CD9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B424CE2201CC56600BF1CD9 /* PaddingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingCell.swift; sourceTree = "<group>"; };
 		5B424CE4201CE9D100BF1CD9 /* PictureInfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInfoCell.swift; sourceTree = "<group>"; };
 		5B768747201E29C2006C54D3 /* PopularPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopularPicture.swift; sourceTree = "<group>"; };
@@ -608,6 +609,7 @@
 				5BBF0850200FEA73009E1FBA /* LaunchScreen.storyboard in Resources */,
 				5B332DD0206FAE1B000D74F6 /* frame.scn in Resources */,
 				5B1BDF7F206F8BCA00493DFF /* frame.dae in Resources */,
+				5B955473209335A900962877 /* Assets.xcassets in Resources */,
 				5BBF084B200FEA73009E1FBA /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -876,8 +878,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 331EB1113A8BD5570B5BF501 /* Pods-ARGallery.debug.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = UGR4K46F7Y;
 				INFOPLIST_FILE = ARGallery/Info.plist;
@@ -894,8 +894,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C57D63501895B2245D7BD9C4 /* Pods-ARGallery.release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = UGR4K46F7Y;
 				INFOPLIST_FILE = ARGallery/Info.plist;

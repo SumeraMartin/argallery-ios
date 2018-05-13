@@ -16,8 +16,6 @@ extension PictureDetailSectionItem: IdentifiableType, Equatable {
         switch (lhs, rhs) {
             case let (.pictureDetail(l), .pictureDetail(r)):
                 return l.id == r.id
-            default:
-                return false
         }
     }
 }

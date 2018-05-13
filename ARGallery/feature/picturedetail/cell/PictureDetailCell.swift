@@ -107,9 +107,9 @@ class PictureDetailCell: BaseCollectionViewCell {
         isPopular
             .subscribe(onNext: { isPopular in
                 if isPopular {
-                    self.popularView.backgroundColor = UIColor.green
+                    self.popularView.image = UIImage(named: "ic_favorite")
                 } else {
-                    self.popularView.backgroundColor = UIColor.red
+                    self.popularView.image = UIImage(named: "ic_not_favorite")
                 }
             })
             .disposed(by: disposeBagCell)
@@ -211,16 +211,12 @@ class PictureDetailCell: BaseCollectionViewCell {
         delegate?.descriptionIsShown()
         
         blurVisualEffect.isHidden = false
-        
-        hideViewWithAnimation(popularView)
     }
     
     func setDescriptionHiddenState() {
         delegate?.descriptionIsHidden()
         
         blurVisualEffect.isHidden = true
-        
-        showViewWithAnimation(popularView)
     }
     
     private func setNormalZoomState(_ gestureRecognizer: UITapGestureRecognizer) {

@@ -45,14 +45,10 @@ class PictureNode {
     private class func resizeChildWithName(node: SCNNode, name: String, width: CGFloat, height: CGFloat) {
         let node = node.childNode(withName: name, recursively: true)!
         node.scale = SCNVector3(CGFloat(originalScale.x) * width, CGFloat(originalScale.y) * height, CGFloat(originalScale.z))
-//        let plane = node.geometry as! SCNPlane
-//        plane.width = width
-//        plane.height = height
     }
     
     private class func createNode(material: SCNMaterial) -> SCNNode {
         let node = SCNNode()
-//        node.geometry?.materials = [material]
         return node
     }
     

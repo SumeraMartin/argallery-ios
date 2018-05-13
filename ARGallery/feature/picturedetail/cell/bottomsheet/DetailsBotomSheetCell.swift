@@ -6,7 +6,10 @@ class DetailsBottomSheetCell: BaseTableViewCell {
     
     @IBOutlet weak var year: UILabel!
     
+    @IBOutlet weak var price: UILabel!
+    
     func bind(_ picture: Picture) {
-        year.text = String(picture.price)
+        year.text = String(format: "%.0f", picture.year)
+        price.text = String(format: "%.0f", picture.price)
     }
 }

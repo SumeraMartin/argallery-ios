@@ -7,7 +7,8 @@ extension PopularPicture {
             author: author,
             pictureUrl: pictureUrl,
             description: description,
-            price: price
+            price: price,
+            year: year
         )
     }
     
@@ -19,6 +20,7 @@ extension PopularPicture {
         popular.pictureUrl = picture.pictureUrl
         popular.pictureDescription = picture.description
         popular.price = picture.price
+        popular.year = picture.year
         return popular
     }
 }
