@@ -1,6 +1,6 @@
 import RxSwift
 
-protocol PictureDataSourceServiceType {
+protocol PictureDataSourceServiceType: AnyObject {
     
     func getLoadingStateWithDataObservable() -> Observable<LoadingStateWithPictures>
     

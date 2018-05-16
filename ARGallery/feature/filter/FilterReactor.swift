@@ -41,12 +41,6 @@ class FilterReactor: BaseReactor {
                     filter.secondCategoryEnabled = !oldFilter.secondCategoryEnabled
                     return filter
                 }
-            case .thirdCategoryChanged:
-                return changeFilter { oldFilter in
-                    var filter = oldFilter
-                    filter.thirdCategoryEnabled = !oldFilter.thirdCategoryEnabled
-                    return filter
-                }
             case .viewWillDissappear:
                 return self.state.take(1)
                     .flatMapLatest { state in
@@ -85,7 +79,6 @@ extension FilterReactor {
         case yearRangeChanged(minYear: Int, maxYear: Int)
         case firstCategoryChanged
         case secondCategoryChanged
-        case thirdCategoryChanged
         case viewWillDissappear
         case reset
     }
