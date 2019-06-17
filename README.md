@@ -1,20 +1,24 @@
-# Kentico Cloud Art Gallery Application for Android
+# Kentico Cloud Art Gallery Application for iOS
 
-Implementation of an art gallery application for Android written in Kotlin that utilizes Kentico Cloud CMS for content management. 
 
-With the ARCore platform, the application supports Augmented Reality and is able to create a virtual gallery within real environment.
-Examples of how the app work can be seen [here](https://is.muni.cz/th/yabmm/videos.zip).
+Implementation of an art gallery application for iOS written in Swift utilizing Kentico Cloud CMS for content management.
 
-![list](./screenshots/argalleryList.png)
-![detail](./screenshots/argalleryDetail.png)
-![ar](./screenshots/argalleryWall.png)
+With the ARKit development platform, the application supports Augmented Reality and is able to create a virtual gallery within real environment. Examples of working apps can be seen [here](https://is.muni.cz/th/yabmm/videos.zip).
 
-## Application Installation
-1. Install [Android Studio](https://developer.android.com/studio/) and the latest Android SDK tools. 
-2. Clone or download the repository into a chosen folder. 
-3. Open the project in the IDE, let it install all the necessary libraries and tools. 
-4. Building the project in Android Studio creates an `.apk` file, located in `app\build\outputs\apk\debug`.
-5. The file can be used to install the application on a mobile device, but be sure to have one that [supports ARCore platform](https://developers.google.com/ar/discover/supported-devices).
+<p float="left">
+  <img src="https://raw.githubusercontent.com/SumeraMartin/argallery-ios/master/screenshots/inAction.PNG" width="250" height="500"/>
+  <img src="https://raw.githubusercontent.com/SumeraMartin/argallery-ios/master/screenshots/thumbnail.PNG" width="250" height="500"/>
+  <img src="https://raw.githubusercontent.com/SumeraMartin/argallery-ios/master/screenshots/preview.PNG" width="250" height="500"/>
+</p>
 
-## Looking for iOS?
-[![Apple iOS](./screenshots/apple.jpg) Click here](https://github.com/Kentico/argallery-ios)
+How to run:
+1. Install [XCode](https://developer.apple.com/xcode/) (best works with Xcode 9.2).
+1. Clone or download the repository into chosen folder.
+1. Run `pod install` in terminal in project directory - [CocoaPods](https://cocoapods.org/) dependency manager must be installed.
+1. Open *ARGallery.workspace* workspace in XCode.
+1. [Run on a real device](https://help.apple.com/xcode/mac/current/#/dev5a825a1ca) since AR capabilities are not supported in the simulator.
+
+*If you want to run on a device with iOs 12 or higher using Xcode 9.2 you have to [import device support](https://github.com/filsv/iPhoneOSDeviceSupport) for your particular iOs version.*
+
+## Looking for Android?
+[![Google Android](./screenshots/android.png) Click here](https://github.com/Kentico/argallery-android)
